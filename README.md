@@ -1,0 +1,2 @@
+# project-seada
+Sistema de Extracción y Análisis de Datos de fuentes Abiertas
