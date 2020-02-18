@@ -1,7 +1,11 @@
 #!/usr/bin/env python
-# DEASOS - Data Extraction and Analysis System from Open sources
+# -*- coding: utf-8 -*-
+# DEASOS - Data Extraction and Analysis System from Open Sources
 
-from argparse import ArgumentParser
+import argparse
+import platform
+
+__version__ = 0.1
 
 
 def banner():
@@ -12,13 +16,29 @@ def banner():
     f.close()
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(prog='seada.py',
+                                     description='Sistema de Extracción y Análisis de Datos de fuentes Abiertas',
+                                     epilog='Enjoy the program! :)')
+    parser.add_argument('--account', '-a', metavar='ACCOUNT', type=str, help='User twitter account')
+    parser.add_argument('--account-list', '-al', metavar='ACCOUNT-LIST', type=str, help='User list twitter account')
+    parser.add_argument('--output', '-o', choices=['csv', 'json'], help='Type of file output')
+    parser.add_argument('--version', '-v', action='version', version=f"%(prog)s {__version__}")
+    parser.add_argument('--test', '-t', help='test')
+    args = parser.parse_args()
+    return args
+
+
 def main():
+
+    version_string = f"%(prog)s {__version__}\n" + f"{requests.__description__}:  {requests.__version__}\n" + \
+                     f"Python:  {platform.python_version()}"
+
+    args = parse_args()
     banner()
 
-    argp = ArgumentParser(
-        description='Descripción breve del programa',
-        epilog='Copyright 2018 Autor bajo licencia GPL v3.0'
-    )
+    print(args.account)
+    print(version_string)
 
 
 if __name__ == '__main__':
