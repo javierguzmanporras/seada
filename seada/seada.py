@@ -4,6 +4,7 @@
 
 import argparse
 import platform
+import os, sys
 
 __version__ = 0.1
 
@@ -29,16 +30,25 @@ def parse_args():
     return args
 
 
+def config():
+    try:
+        consumer_key = os.environ['CONSUMER_KEY']
+        consumer_secret = os.environ['CONSUMER_SECRET']
+        access_token = os.environ['ACCESS_TOKEN']
+        access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
+    except KeyError:
+        print("Error, any key not found...")
+        print("Error: " + str(sys.exc_info()))
+
+
 def main():
 
-    version_string = f"%(prog)s {__version__}\n" + f"{requests.__description__}:  {requests.__version__}\n" + \
-                     f"Python:  {platform.python_version()}"
+    #version_string = f"%(prog)s {__version__}\n" + f"{requests.__description__}:  {requests.__version__}\n" + \
+    #                 f"Python:  {platform.python_version()}"
 
     args = parse_args()
     banner()
-
-    print(args.account)
-    print(version_string)
+    config()
 
 
 if __name__ == '__main__':
