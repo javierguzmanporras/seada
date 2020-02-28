@@ -128,3 +128,12 @@ class TwitterUser:
     def get_json_output(self):
         with open('user_file.json', mode='w') as user_file:
             json.dump(self.json_user, user_file)
+
+    def get_tuple_output(self):
+        tuple_user = (self.id, self.name, self.screen_name, self.location, self.description, self.url,
+                      self.protected, self.followers_count, self.friends_count, self.listed_count, self.created_at,
+                      self.favourites_count, self.geo_enabled, self.verified, self.statuses_count,
+                      self.profile_image_url_https, self.profile_banner_url, self.default_profile,
+                      self.default_profile_image)
+
+        return tuple_user
