@@ -33,41 +33,26 @@ class Database:
         """
 
         user_sql_query = "CREATE TABLE user(id integer PRIMARY KEY, name text, screen_name text, location text," \
-                   "description test, url text, protected text, followers_count text, friends_count text, " \
-                   "listed_count text, created_at text, favourites_count text, geo_enabled text, verified text, " \
+                   "description test, url text, protected text, followers_count text, friends_count text," \
+                   "listed_count text, created_at text, favourites_count text, geo_enabled text, verified text," \
                    "statuses_count text, profile_image_url_https text, profile_banner_url text, default_profile text," \
                    "default_profile_image)"
 
         tweet_sql_query = "CREATE TABLE tweet(id integer PRIMARY KEY, created_at text, text text, truncated text," \
-                          "source text, in_reply_to_status_id text, )"
+                          "source text, in_reply_to_status_id_str text, in_reply_to_user_id_str text," \
+                          "in_reply_to_screen_name text, coordinates text, place text, contributors text, " \
+                          "is_quote_status text, retweet_count text, favorite_count text, favorited text, " \
+                          "retweetd text, possibly_sensitive text, lang text)"
 
-
-        self.in_reply_to_status_id = ""
-        self.in_reply_to_status_id_str = ""
-        self.in_reply_to_user_id = ""
-        self.in_reply_to_user_id_str = ""
-        self.in_reply_to_screen_name = ""
-        # user
-        self.coordinates = ""
-        self.place = ""
-        self.contributors = ""
-        self.is_quote_status = ""
-        self.retweet_count = ""
-        self.favorite_count = ""
-        self.favorited = ""
-        self.retweeted = ""
-        self.possibly_sensitive = ""
-        self.lang = ""
-        # self.user_name = ""
-        self.tuit = {}
-        self.entities_hashtags = []
-        self.entities_user_mentions = []
-        self.entities_urls = []
-
+        # self.tuit = {}
+        # self.entities_hashtags = []
+        # self.entities_user_mentions = []
+        # self.entities_urls = []
 
         try:
             cursor = connection.cursor()
-            cursor.execute(query)
+            cursor.execute(user_sql_query)
+            cursor.execute(tweet_sql_query)
             connection.commit()
         except Error:
             print(Error)
@@ -97,5 +82,10 @@ class Database:
         :param tweet: Tuple objetct of Tweet
         :return: ¿¿??
         """
-        sql_query = '''INSERT INTO tweet()'''
+        sql_query = '''INSERT INTO tweet(id, created_at, text, truncated, source, in_reply_to_status_id_str,
+         in_reply_to_user_id_str, in_reply_to_screen_name, coordinates, place, contributors, is_quote_status, 
+         retweet_count, favorite_count, favorited, retweetd, possibly_sensitive, lang)
+         VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'''
+
+
 
