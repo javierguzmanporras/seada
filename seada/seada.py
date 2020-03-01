@@ -6,6 +6,9 @@ import argparse
 import os
 import sys
 import tweepy
+from TwitterUser import *
+from Database import *
+
 
 __version__ = 0.1
 
@@ -35,7 +38,7 @@ def parse_args():
                                      description='Sistema de Extracción y Análisis de Datos de fuentes Abiertas',
                                      epilog='Enjoy the program! :)')
     parser.add_argument('-a', '--account', metavar='ACCOUNT', type=str, help='User twitter account')
-    parser.add_argument('-al', '--account-list', metavar='ACCOUNT-LIST', type=str, help='User list twitter account')
+    parser.add_argument('-al', '--account_list', metavar='ACCOUNT-LIST', type=str, help='User list twitter account')
     parser.add_argument('-o', '--output', choices=['csv', 'json'], help='Type of file output')
     parser.add_argument('-v', '--version', action='version', version=f"%(prog)s {__version__}")
     args = parser.parse_args()
@@ -68,10 +71,51 @@ def config_twitter_api():
     return api
 
 
+def test_user(api, username, db, connection, dataset_directory):
+    user = TwitterUser(dataset_directory)
+    user.set_user_information(api.get_user(username))
+    user.get_csv_output()
+    user.get_json_output()
+    user_tuple = user.get_tuple_output()
+    print(user_tuple)
+    row_id = db.create_user(connection, user_tuple)
+    print("[test_user] ROW_ID: " + str(row_id))
+
+
+def config_database(db_name):
+    """
+    Create a database in sqlite3
+    :param db_name: The name of the file for the database
+    :return: A database objetc and his connections object
+    """
+    db = Database()
+    connection = db.create_connection(db_name)
+    db.create_table(connection)
+    return db, connection
+
+
+def config_dataset_output(path):
+    if not os.path.exists(path):
+        try:
+            os.makedirs(path)
+        except os.error as e:
+            print("[config_dataset_output] Fail to create folder" + path + str(e))
+
+
 def main():
+    dataset_directory = database_directory = 'dataset'
+    database_name = 'twitter_database.db'
+    database_path = database_directory + '/' + database_name
+
     args = parse_args()
     banner()
+    config_dataset_output(dataset_directory)
+    db, connection = config_database(database_path)
     api = config_twitter_api()
+
+    if args.account:
+        test_user(api, args.account, db, connection, dataset_directory)
+        # test_user(api, "jgp_ingTeleco", db, connection)
 
 
 if __name__ == '__main__':
