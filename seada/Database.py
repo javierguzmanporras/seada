@@ -2,26 +2,24 @@
 # -*- coding: utf-8 -*-
 
 import sqlite3
-from sqlite3 import Error
 
 
 class Database:
-    """Database for tweets"""
+    """Database for twitter"""
 
     def __init__(self):
-        #self.connection
         pass
 
     def create_connection(self, database_name):
         """ create a database connection to the SQLite database specified by database_name
-        :param db_file: database file
+        :param database_name: database file
         :return: Connection object or None
         """
         connection = None
         try:
             connection = sqlite3.connect(database_name)
-        except Error:
-            print (Error)
+        except sqlite3.Error as e:
+            print("[create_connection] Error: " + str(e))
 
         return connection
 
@@ -33,10 +31,10 @@ class Database:
         """
 
         user_sql_query = "CREATE TABLE user(id integer PRIMARY KEY, name text, screen_name text, location text," \
-                   "description test, url text, protected text, followers_count text, friends_count text," \
-                   "listed_count text, created_at text, favourites_count text, geo_enabled text, verified text," \
-                   "statuses_count text, profile_image_url_https text, profile_banner_url text, default_profile text," \
-                   "default_profile_image)"
+                         "description test, url text, protected text, followers_count text, friends_count text," \
+                         "listed_count text, created_at text, favourites_count text, geo_enabled text, verified text," \
+                         "statuses_count text, profile_image_url_https text, profile_banner_url text, " \
+                         "default_profile text, default_profile_image text)"
 
         tweet_sql_query = "CREATE TABLE tweet(id integer PRIMARY KEY, created_at text, text text, truncated text," \
                           "source text, in_reply_to_status_id_str text, in_reply_to_user_id_str text," \
@@ -54,8 +52,8 @@ class Database:
             cursor.execute(user_sql_query)
             cursor.execute(tweet_sql_query)
             connection.commit()
-        except Error:
-            print(Error)
+        except sqlite3.Error as e:
+            print("[create_table] Error: " + str(e))
 
     def create_user(self, connection, user):
         """
@@ -71,7 +69,11 @@ class Database:
         VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'''
 
         cursor = connection.cursor()
-        cursor.execute(sql_query, user)
+        try:
+            cursor.execute(sql_query, user)
+        except sqlite3.IntegrityError:
+            print("[create_user] User was created before in database")
+
         connection.commit()
         return cursor.lastrowid
 
