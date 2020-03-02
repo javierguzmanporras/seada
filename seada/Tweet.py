@@ -1,16 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import Utils
+
+
 class Tweet():
+    """Tweets of Users"""
     languages = {}
     sources = {}
     places = {}
     hashtags = {}
+    ntweets = 0
 
     def __init__(self):
+        # tweet information (19)
         self.created_at = ""
         self.id = ""
-        self.id_str = ""
         self.text = ""
         self.truncated = ""
         self.source = ""
@@ -31,55 +36,60 @@ class Tweet():
         self.possibly_sensitive = ""
         self.lang = ""
         #self.user_name = ""
-        self.tuit = {}
         self.entities_hashtags = []
         self.entities_user_mentions = []
         self.entities_urls = []
-    
+        # Other information
+        self.tweet = {}
+        self.raw_json_tweet = ""
 
-    def set_tuit_information(self, item):
+    def set_tweet_information(self, item):
+        """
+        Set tweet information from tweepy object tweet.
+        :param item:
+        :return:
+        """
+        self.raw_json_tweet = Utils.json_to_string(item)
         self.created_at = item.created_at
-        self.tuit['created_at'] = str(item.created_at)
-        #self.id = item.id
-        #self.tuit['id'] = item.id
-        self.id_str = item.id_str
-        self.tuit['id_str'] = item.id_str
+        self.tweet['created_at'] = str(item.created_at)
+        self.id = item.id
+        self.tuit['id'] = item.id
         self.text = item.full_text
-        self.tuit['text'] = item.full_text
+        self.tweet['text'] = item.full_text
         self.truncated = item.truncated
-        self.tuit['truncated'] = item.truncated
+        self.tweet['truncated'] = item.truncated
         self.source = item.source
-        self.tuit['source'] = item.source
+        self.tweet['source'] = item.source
         self.in_reply_to_status_id = item.in_reply_to_status_id
-        self.tuit['in_reply_to_status_id'] = item.in_reply_to_status_id
+        self.tweet['in_reply_to_status_id'] = item.in_reply_to_status_id
         self.in_reply_to_status_id_str = item.in_reply_to_status_id_str
-        self.tuit['in_reply_to_status_id_str'] = item.in_reply_to_status_id_str
+        self.tweet['in_reply_to_status_id_str'] = item.in_reply_to_status_id_str
         self.in_reply_to_user_id = item.in_reply_to_user_id
-        self.tuit['in_reply_to_user_id'] = item.in_reply_to_user_id
+        self.tweet['in_reply_to_user_id'] = item.in_reply_to_user_id
         self.in_reply_to_user_id_str = item.in_reply_to_user_id_str
-        self.tuit['in_reply_to_user_id_str'] = item.in_reply_to_user_id_str
+        self.tweet['in_reply_to_user_id_str'] = item.in_reply_to_user_id_str
         self.in_reply_to_screen_name = item.in_reply_to_screen_name
-        self.tuit['in_reply_to_screen_name'] = item.in_reply_to_screen_name
+        self.tweet['in_reply_to_screen_name'] = item.in_reply_to_screen_name
         self.coordinates = item.coordinates
-        self.tuit['coordinates'] = item.coordinates
+        self.tweet['coordinates'] = item.coordinates
         self.place = item.place
-        self.tuit['place'] = item.place
+        self.tweet['place'] = item.place
         self.contributors = item.contributors
-        self.tuit['contributors'] = item.contributors
+        self.tweet['contributors'] = item.contributors
         self.is_quote_status = item.is_quote_status
-        self.tuit['is_quote_status'] = item.is_quote_status
+        self.tweet['is_quote_status'] = item.is_quote_status
         self.retweet_count = item.retweet_count
-        self.tuit['retweet_count'] = item.retweet_count
+        self.tweet['retweet_count'] = item.retweet_count
         self.favorite_count = item.favorite_count
-        self.tuit['favorite_count'] = item.favorite_count
+        self.tweet['favorite_count'] = item.favorite_count
         self.favorited = item.favorited
-        self.tuit['favorited'] = item.favorited
+        self.tweet['favorited'] = item.favorited
         self.retweeted = item.retweeted
-        self.tuit['retweet'] = item.retweeted
+        self.tweet['retweet'] = item.retweeted
         #self.possibly_sensitive = item.possibly_sensitive
         #self.tuit['possibly_sensitive'] = item.possibly_sensitive
         self.lang = item.lang
-        self.tuit['lang'] = item.lang
+        self.tweet['lang'] = item.lang
 
         e = item.entities
         if len(e['hashtags']) > 0:
@@ -94,9 +104,9 @@ class Tweet():
             for url in e['urls']:
                 self.entities_urls.append(url['expanded_url'])
 
-        self.tuit['hashtags'] = self.entities_hashtags
-        self.tuit['user_mentions'] = self.entities_user_mentions
-        self.tuit['urls'] = self.entities_urls
+        self.tweet['hashtags'] = self.entities_hashtags
+        self.tweet['user_mentions'] = self.entities_user_mentions
+        self.tweet['urls'] = self.entities_urls
 
         #if self.truncated:
         #    print(item.text_)
