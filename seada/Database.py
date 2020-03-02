@@ -40,7 +40,7 @@ class Database:
                           "source text, in_reply_to_status_id_str text, in_reply_to_user_id_str text," \
                           "in_reply_to_screen_name text, coordinates text, place text, contributors text, " \
                           "is_quote_status text, retweet_count text, favorite_count text, favorited text, " \
-                          "retweetd text, possibly_sensitive text, lang text)"
+                          "retweetd text, possibly_sensitive text, lang text, raw_tweet text)"
 
         # self.tuit = {}
         # self.entities_hashtags = []
@@ -86,8 +86,20 @@ class Database:
         """
         sql_query = '''INSERT INTO tweet(id, created_at, text, truncated, source, in_reply_to_status_id_str,
          in_reply_to_user_id_str, in_reply_to_screen_name, coordinates, place, contributors, is_quote_status, 
-         retweet_count, favorite_count, favorited, retweetd, possibly_sensitive, lang)
-         VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'''
+         retweet_count, favorite_count, favorited, retweetd, possibly_sensitive, lang, raw_tweet)
+         VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'''
+
+        cursor = connection.cursor()
+        try:
+            cursor.execute(sql_query, tweet)
+        except sqlite3.IntegrityError:
+            print("[Database][create_tweet] Tweet was created before in database")
+        except sqlite3.InterfaceError:
+            pass
+
+        connection.commit()
+        return cursor.lastrowid
+
 
 
 
