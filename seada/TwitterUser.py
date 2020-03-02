@@ -59,7 +59,7 @@ class TwitterUser:
         :return: None
         """
         self.raw_json_user = self.__json_to_string(user)
-        self.user['raw_json_user'] = self.raw_json_user
+        #self.user['raw_json_user'] = self.raw_json_user
         self.id = user.id
         self.user['id'] = user.id
         self.name = user.name
