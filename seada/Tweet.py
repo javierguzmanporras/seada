@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import Utils
+from Utils import *
 
 
-class Tweet():
+class Tweet:
     """Tweets of Users"""
     languages = {}
     sources = {}
@@ -19,9 +19,7 @@ class Tweet():
         self.text = ""
         self.truncated = ""
         self.source = ""
-        self.in_reply_to_status_id = ""
         self.in_reply_to_status_id_str = ""
-        self.in_reply_to_user_id = ""
         self.in_reply_to_user_id_str = ""
         self.in_reply_to_screen_name = ""
         #user
@@ -41,7 +39,7 @@ class Tweet():
         self.entities_urls = []
         # Other information
         self.tweet = {}
-        self.raw_json_tweet = ""
+        self.raw_tweet = ""
 
     def set_tweet_information(self, item):
         """
@@ -49,23 +47,19 @@ class Tweet():
         :param item:
         :return:
         """
-        self.raw_json_tweet = Utils.json_to_string(item)
+        self.raw_tweet = Utils.json_to_string(item)
         self.created_at = item.created_at
         self.tweet['created_at'] = str(item.created_at)
         self.id = item.id
-        self.tuit['id'] = item.id
+        self.tweet['id'] = item.id
         self.text = item.full_text
         self.tweet['text'] = item.full_text
         self.truncated = item.truncated
         self.tweet['truncated'] = item.truncated
         self.source = item.source
         self.tweet['source'] = item.source
-        self.in_reply_to_status_id = item.in_reply_to_status_id
-        self.tweet['in_reply_to_status_id'] = item.in_reply_to_status_id
         self.in_reply_to_status_id_str = item.in_reply_to_status_id_str
         self.tweet['in_reply_to_status_id_str'] = item.in_reply_to_status_id_str
-        self.in_reply_to_user_id = item.in_reply_to_user_id
-        self.tweet['in_reply_to_user_id'] = item.in_reply_to_user_id
         self.in_reply_to_user_id_str = item.in_reply_to_user_id_str
         self.tweet['in_reply_to_user_id_str'] = item.in_reply_to_user_id_str
         self.in_reply_to_screen_name = item.in_reply_to_screen_name
@@ -149,3 +143,23 @@ class Tweet():
 
         for key, val in self.hashtags.items():
             print(str(key) + " => " + str(val))
+
+    def get_tuple_output(self):
+        """
+        Generate a tuple with tweet information for input database
+        :return: A tuple with tweet information
+        """
+        tuple_tweet = (self.id, self.created_at, self.text, self.truncated, self.source,
+                       self.in_reply_to_status_id_str, self.in_reply_to_user_id_str, self.in_reply_to_screen_name,
+                       self.coordinates, self.place, self.contributors,
+                       self.is_quote_status, self.retweet_count, self.favorite_count, self.favorited, self.retweeted,
+                       self.possibly_sensitive, self.lang, self.raw_tweet)
+        return tuple_tweet
+
+
+
+    # user
+    # self.user_name = ""
+    #self.entities_hashtags = []
+    #self.entities_user_mentions = []
+    #self.entities_urls = []
