@@ -3,6 +3,7 @@
 
 import json
 from Tweet import *
+
 import csv
 
 
@@ -29,7 +30,7 @@ class TweetMiner():
             self.toString(item)
             t = Tweet()
             t.set_tuit_information(item)
-            self.tweets.append(t.tuit)
+            self.tweets.append(t.tweet)
 
     def get_report(self):
         Tweet.get_report()
