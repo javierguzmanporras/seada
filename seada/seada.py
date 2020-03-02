@@ -8,6 +8,7 @@ import sys
 import tweepy
 from TwitterUser import *
 from Database import *
+from TweetMiner import *
 
 
 __version__ = 0.1
@@ -72,6 +73,7 @@ def config_twitter_api():
 
 
 def test_user(api, username, db, connection, dataset_directory):
+    # user
     user = TwitterUser(dataset_directory)
     user.set_user_information(api.get_user(username))
     user.get_csv_output()
@@ -80,6 +82,15 @@ def test_user(api, username, db, connection, dataset_directory):
     print(user_tuple)
     row_id = db.create_user(connection, user_tuple)
     print("[test_user] ROW_ID: " + str(row_id))
+    print()
+
+    #tweets
+    tm = TweetMiner()
+    tm.mine_tweets(api, username, 3000)
+    #tm.get_json_output('tweets_file.json', dataset_directory)
+    tm.add_tweets_to_database(db, connection)
+
+
 
 
 def config_database(db_name):
