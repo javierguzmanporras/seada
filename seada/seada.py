@@ -40,7 +40,8 @@ def parse_args():
                                      epilog='Enjoy the program! :)')
     parser.add_argument('-a', '--account', metavar='ACCOUNT', type=str, help='User twitter account')
     parser.add_argument('-al', '--account_list', metavar='ACCOUNT-LIST', type=str, help='User list twitter account')
-    parser.add_argument('-o', '--output', choices=['csv', 'json'], help='Type of file output')
+    parser.add_argument('-o', '--output', choices=['csv', 'json', 'database', 'all'], default='json',
+                        help='Types of output between json, csv or database. You can chose one or all of them.')
     parser.add_argument('-v', '--version', action='version', version=f"%(prog)s {__version__}")
     args = parser.parse_args()
     return args
@@ -106,6 +107,11 @@ def config_database(db_name):
 
 
 def config_dataset_output(path):
+    """
+    Config output folder for dataset
+    :param path:
+    :return:
+    """
     if not os.path.exists(path):
         try:
             os.makedirs(path)
@@ -121,12 +127,19 @@ def main():
     args = parse_args()
     banner()
     config_dataset_output(dataset_directory)
-    db, connection = config_database(database_path)
-    api = config_twitter_api()
 
-    if args.account:
-        test_user(api, args.account, db, connection, dataset_directory)
-        # test_user(api, "jgp_ingTeleco", db, connection)
+    print(vars(args))
+    print(len(args.output))
+
+
+
+
+    # db, connection = config_database(database_path)
+    # api = config_twitter_api()
+    #
+    # if args.account:
+    #     test_user(api, args.account, db, connection, dataset_directory)
+    #     # test_user(api, "jgp_ingTeleco", db, connection)
 
 
 if __name__ == '__main__':
