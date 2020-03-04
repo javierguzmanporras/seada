@@ -76,23 +76,31 @@ def config_twitter_api():
     return api
 
 
-def test_user(api, username, db, connection, dataset_directory, ntweets):
+def test_user(api, args, username, db, connection, dataset_directory, ntweets):
     # user
     user = TwitterUser(dataset_directory)
     user.set_user_information(api.get_user(username))
-    user.get_csv_output()
-    user.get_json_output()
-    user_tuple = user.get_tuple_output()
-    print(user_tuple)
-    row_id = db.create_user(connection, user_tuple)
-    print("[test_user] ROW_ID: " + str(row_id))
-    print()
+
+    if args.outpt == 'csv' or args.output == 'all':
+        user.get_csv_output()
+
+    if args.outpt == 'json' or args.output == 'all':
+        user.get_json_output()
+
+    if args.output == 'database' or args.output == 'all':
+        user_tuple = user.get_tuple_output()
+        print(user_tuple)
+        row_id = db.create_user(connection, user_tuple)
+        print("[test_user] ROW_ID: " + str(row_id))
+        print()
 
     #tweets
     tm = TweetMiner()
     tm.mine_tweets(api, username, ntweets)
-    #tm.get_json_output('tweets_file.json', dataset_directory)
-    tm.add_tweets_to_database(db, connection)
+    tm.get_json_output('tweets_file.json', dataset_directory)
+
+    if args.output == 'database' or args.output == 'all':
+        tm.add_tweets_to_database(db, connection)
 
 def config_database(db_name):
     """
@@ -124,19 +132,20 @@ def main():
     banner()
 
     print(vars(args))
-    print(len(args.output))
 
     dataset_directory = database_directory = args.output_folder
     database_name = 'seada_database.db'
     database_path = database_directory + '/' + database_name
 
     config_dataset_output(dataset_directory)
-    db, connection = config_database(database_path)
+
+    if args.output == 'database' or args.output == 'all':
+        db, connection = config_database(database_path)
+
     api = config_twitter_api()
 
     if args.account:
-         test_user(api, args.account, db, connection, dataset_directory, args.tweets_number)
-    #     # test_user(api, "jgp_ingTeleco", db, connection)
+         test_user(api, args, args.account, db, connection, dataset_directory, args.tweets_number)
 
 
 if __name__ == '__main__':
