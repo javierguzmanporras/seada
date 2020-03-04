@@ -19,12 +19,12 @@ def banner():
     Function for print a banner
     """
     try:
-        banner_file = open("banner2.txt", 'r')
+        banner_file = open("banner.txt", 'r')
         for line in banner_file.readlines():
             print(line.replace("\n", ""))
         banner_file.close()
     except FileNotFoundError:
-        print('[seada.banner] Error: The banner file not found')
+        print('[main][banner] Error: The banner file not found')
     except Exception as exception:
         print(exception)
         raise
@@ -40,8 +40,11 @@ def parse_args():
                                      epilog='Enjoy the program! :)')
     parser.add_argument('-a', '--account', metavar='ACCOUNT', type=str, help='User twitter account')
     parser.add_argument('-al', '--account_list', metavar='ACCOUNT-LIST', type=str, help='User list twitter account')
+    parser.add_argument('-n', '--tweets_number', default=100, type=int, help='Number of tweets that will get from user')
     parser.add_argument('-o', '--output', choices=['csv', 'json', 'database', 'all'], default='json',
                         help='Types of output between json, csv or database. You can chose one or all of them.')
+    parser.add_argument('-of', '--output_folder', default='dataset',
+                        help='Save the dataset output into specific folder')
     parser.add_argument('-v', '--version', action='version', version=f"%(prog)s {__version__}")
     args = parser.parse_args()
     return args
@@ -58,22 +61,22 @@ def config_twitter_api():
         consumer_secret = os.environ['CONSUMER_SECRET']
         access_token = os.environ['ACCESS_TOKEN']
         access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
-    except KeyError:
-        print("Error, any access key not found...")
-        print("Error: " + str(sys.exc_info()))
+    except KeyError as e:
+        print('[main][config_twitter_api] Error, ' + str(e) + ' environment variable for access key not found.')
+        sys.exit(-1)
 
     try:
         auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(access_token, access_token_secret)
         api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
-    except tweepy.TweepError:
-        print("Fatal error with authentication process")
-        raise
+    except tweepy.TweepError as e:
+        print("[main][config_twitter_api] Fatal error with authentication process " + str(e))
+        sys.exit(-1)
 
     return api
 
 
-def test_user(api, username, db, connection, dataset_directory):
+def test_user(api, username, db, connection, dataset_directory, ntweets):
     # user
     user = TwitterUser(dataset_directory)
     user.set_user_information(api.get_user(username))
@@ -87,12 +90,9 @@ def test_user(api, username, db, connection, dataset_directory):
 
     #tweets
     tm = TweetMiner()
-    tm.mine_tweets(api, username, 3000)
+    tm.mine_tweets(api, username, ntweets)
     #tm.get_json_output('tweets_file.json', dataset_directory)
     tm.add_tweets_to_database(db, connection)
-
-
-
 
 def config_database(db_name):
     """
@@ -109,36 +109,33 @@ def config_database(db_name):
 def config_dataset_output(path):
     """
     Config output folder for dataset
-    :param path:
-    :return:
+    :param path: Folder's path for dataset files.
     """
     if not os.path.exists(path):
         try:
             os.makedirs(path)
         except os.error as e:
-            print("[config_dataset_output] Fail to create folder" + path + str(e))
+            print("[config_dataset_output] Fail to create folder " + path + ". Reason: " + str(e))
+            sys.exit(-1)
 
 
 def main():
-    dataset_directory = database_directory = 'dataset'
-    database_name = 'twitter_database.db'
-    database_path = database_directory + '/' + database_name
-
     args = parse_args()
     banner()
-    config_dataset_output(dataset_directory)
 
     print(vars(args))
     print(len(args.output))
 
+    dataset_directory = database_directory = args.output_folder
+    database_name = 'seada_database.db'
+    database_path = database_directory + '/' + database_name
 
+    config_dataset_output(dataset_directory)
+    db, connection = config_database(database_path)
+    api = config_twitter_api()
 
-
-    # db, connection = config_database(database_path)
-    # api = config_twitter_api()
-    #
-    # if args.account:
-    #     test_user(api, args.account, db, connection, dataset_directory)
+    if args.account:
+         test_user(api, args.account, db, connection, dataset_directory, args.tweets_number)
     #     # test_user(api, "jgp_ingTeleco", db, connection)
 
 
