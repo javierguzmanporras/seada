@@ -4,6 +4,7 @@
 import json
 import csv
 import datetime
+import Utils
 
 
 class TwitterUser:
@@ -58,8 +59,8 @@ class TwitterUser:
         :param user: tweepy object user
         :return: None
         """
-        self.raw_json_user = self.__json_to_string(user)
-        #self.user['raw_json_user'] = self.raw_json_user
+        # self.raw_json_user = self.__json_to_string(user)
+        self.raw_json_user = Utils.Utils.json_to_string(user)
         self.id = user.id
         self.user['id'] = user.id
         self.name = user.name
@@ -102,7 +103,6 @@ class TwitterUser:
             self.user['profile_banner_url'] = user.profile_banner_url
         except AttributeError:
             self.user['profile_banner_url'] = ""
-
 
         td = datetime.datetime.today() - self.created_at
         print("[user] td: %s" % str(td))
@@ -153,15 +153,22 @@ class TwitterUser:
                                   self.default_profile,
                                   self.default_profile_image])
 
-    def get_json_output(self):
+    # def get_json_output_old(self):
+    #     """
+    #     Generate a json file from user information. If the file exists, append new item.
+    #     :return: a new json file, or a new item
+    #     """
+    #     file_name = 'user_file.json'
+    #     path_file = self.dataset_directory + '/' + file_name
+    #     with open(path_file, mode='a+') as user_file:
+    #         json.dump(self.user, user_file)
+
+    def get_json_output(self, file_name, dataset_directory):
         """
         Generate a json file from user information. If the file exists, append new item.
         :return: a new json file, or a new item
         """
-        file_name = 'user_file.json'
-        path_file = self.dataset_directory + '/' + file_name
-        with open(path_file, mode='a+') as user_file:
-            json.dump(self.user, user_file)
+        Utils.Utils.get_json_output(file_name, dataset_directory, self.user)
 
     def get_tuple_output(self):
         """
@@ -172,6 +179,6 @@ class TwitterUser:
                       self.protected, self.followers_count, self.friends_count, self.listed_count, str(self.created_at),
                       self.favourites_count, self.geo_enabled, self.verified, self.statuses_count,
                       self.profile_image_url_https, self.profile_banner_url, self.default_profile,
-                      self.default_profile_image)
+                      self.default_profile_image, self.raw_json_user)
 
         return tuple_user
