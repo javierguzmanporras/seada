@@ -34,7 +34,7 @@ class Database:
                          "description test, url text, protected text, followers_count text, friends_count text," \
                          "listed_count text, created_at text, favourites_count text, geo_enabled text, verified text," \
                          "statuses_count text, profile_image_url_https text, profile_banner_url text, " \
-                         "default_profile text, default_profile_image text)"
+                         "default_profile text, default_profile_image text, raw_user text)"
 
         tweet_sql_query = "CREATE TABLE tweet(id integer PRIMARY KEY, created_at text, text text, truncated text," \
                           "source text, in_reply_to_status_id_str text, in_reply_to_user_id_str text," \
@@ -65,8 +65,8 @@ class Database:
 
         sql_query = '''INSERT INTO user(id, name, screen_name, location, description, url, protected,
         followers_count, friends_count, listed_count, created_at, favourites_count, geo_enabled, verified,
-        statuses_count, profile_image_url_https, profile_banner_url, default_profile, default_profile_image) 
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'''
+        statuses_count, profile_image_url_https, profile_banner_url, default_profile, default_profile_image, raw_user) 
+        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'''
 
         cursor = connection.cursor()
         try:
