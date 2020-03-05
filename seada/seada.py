@@ -81,11 +81,11 @@ def test_user(api, args, username, db, connection, dataset_directory, ntweets):
     user = TwitterUser(dataset_directory)
     user.set_user_information(api.get_user(username))
 
-    if args.outpt == 'csv' or args.output == 'all':
+    if args.output == 'csv' or args.output == 'all':
         user.get_csv_output()
 
-    if args.outpt == 'json' or args.output == 'all':
-        user.get_json_output()
+    if args.output == 'json' or args.output == 'all':
+        user.get_json_output('users_file.json', dataset_directory)
 
     if args.output == 'database' or args.output == 'all':
         user_tuple = user.get_tuple_output()
@@ -94,13 +94,15 @@ def test_user(api, args, username, db, connection, dataset_directory, ntweets):
         print("[test_user] ROW_ID: " + str(row_id))
         print()
 
-    #tweets
+    # tweets
     tm = TweetMiner()
     tm.mine_tweets(api, username, ntweets)
-    tm.get_json_output('tweets_file.json', dataset_directory)
+    if args.output == 'json' or args.output == 'all':
+        tm.get_json_output('tweets_file.json', dataset_directory)
 
     if args.output == 'database' or args.output == 'all':
         tm.add_tweets_to_database(db, connection)
+
 
 def config_database(db_name):
     """
@@ -139,13 +141,15 @@ def main():
 
     config_dataset_output(dataset_directory)
 
+    db = None
+    connection = None
     if args.output == 'database' or args.output == 'all':
         db, connection = config_database(database_path)
 
     api = config_twitter_api()
 
     if args.account:
-         test_user(api, args, args.account, db, connection, dataset_directory, args.tweets_number)
+        test_user(api, args, args.account, db, connection, dataset_directory, args.tweets_number)
 
 
 if __name__ == '__main__':
