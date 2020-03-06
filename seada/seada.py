@@ -39,7 +39,7 @@ def parse_args():
                                      description='Sistema de Extracción y Análisis de Datos de fuentes Abiertas',
                                      epilog='Enjoy the program! :)')
     parser.add_argument('-a', '--account', metavar='ACCOUNT', type=str, help='User twitter account')
-    parser.add_argument('-al', '--account_list', metavar='ACCOUNT-LIST', type=str, help='User list twitter account')
+    parser.add_argument('-al', '--account_list', metavar='ACCOUNT-LIST', type=str, nargs='+', help='User list twitter account')
     parser.add_argument('-n', '--tweets_number', default=100, type=int, help='Number of tweets that will get from user')
     parser.add_argument('-o', '--output', choices=['csv', 'json', 'database', 'all'], default='json',
                         help='Types of output between json, csv or database. You can chose one or all of them.')
@@ -79,29 +79,35 @@ def config_twitter_api():
 def test_user(api, args, username, db, connection, dataset_directory, ntweets):
     # user
     user = TwitterUser(dataset_directory)
-    user.set_user_information(api.get_user(username))
+    try:
+        user.set_user_information(api.get_user(username))
 
-    if args.output == 'csv' or args.output == 'all':
-        user.get_csv_output()
+        if args.output == 'csv' or args.output == 'all':
+            user.get_csv_output()
 
-    if args.output == 'json' or args.output == 'all':
-        user.get_json_output('users_file.json', dataset_directory)
+        if args.output == 'json' or args.output == 'all':
+            user.get_json_output('users_file.json', dataset_directory)
 
-    if args.output == 'database' or args.output == 'all':
-        user_tuple = user.get_tuple_output()
-        print(user_tuple)
-        row_id = db.create_user(connection, user_tuple)
-        print("[test_user] ROW_ID: " + str(row_id))
-        print()
+        if args.output == 'database' or args.output == 'all':
+            user_tuple = user.get_tuple_output()
+            # print(user_tuple)
+            row_id = db.create_user(connection, user_tuple)
+            print("[test_user] ROW_ID: " + str(row_id))
+            print()
+    except tweepy.error.TweepError as e:
+        print("[main.test_user] Error: " + str(e))
 
-    # tweets
-    tm = TweetMiner()
-    tm.mine_tweets(api, username, ntweets)
-    if args.output == 'json' or args.output == 'all':
-        tm.get_json_output('tweets_file.json', dataset_directory)
+        # tweets
+        print("lo estoy flipando")
+        tm = TweetMiner()
+        tm.mine_tweets(api, username, ntweets)
+        if args.output == 'json' or args.output == 'all':
+            tm.get_json_output('tweets_file.json', dataset_directory)
+            print("in json")
 
-    if args.output == 'database' or args.output == 'all':
-        tm.add_tweets_to_database(db, connection)
+        if args.output == 'database' or args.output == 'all':
+            tm.add_tweets_to_database(db, connection)
+            print("in database")
 
 
 def config_database(db_name):
@@ -150,6 +156,11 @@ def main():
 
     if args.account:
         test_user(api, args, args.account, db, connection, dataset_directory, args.tweets_number)
+
+    if args.account_list:
+        for account in args.account_list:
+            test_user(api, args, account, db, connection, dataset_directory, args.tweets_number)
+
 
 
 if __name__ == '__main__':
