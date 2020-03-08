@@ -1,7 +1,8 @@
 import json
+import csv
 
 
-class Utils:
+class SeadaUtils:
 
     @classmethod
     def json_to_string(cls, json_information):
@@ -26,5 +27,19 @@ class Utils:
         """
         path_file = dataset_directory + '/' + file_name
         with open(path_file, mode='a+', encoding='utf8') as user_file:
-            json.dump(item, user_file, indent=4, ensure_ascii=False) # indent=4 nos formatea la salida del texto.
+            try:
+                json.dump(item, user_file, indent=4, ensure_ascii=False) # indent=4 nos formatea la salida del texto.
+            except TypeError as e:
+                print("[SeadaUtils][get_json_output] TypeError: " + str(e))
+
+    @classmethod
+    def get_csv_output(cls, file_name, dataset_directory, item):
+        """
+        Generate a cvs file from user information instance. If the file exists, append info in new row.
+        :return: a new csv file or a new row.
+        """
+        path_file = dataset_directory + '/' + file_name
+        with open(file=path_file, mode='a+') as csv_file:
+            csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            csv_writer.writerow(item)
 
