@@ -76,38 +76,40 @@ def config_twitter_api():
     return api
 
 
-def test_user(api, args, username, db, connection, dataset_directory, ntweets):
-    # user
+def get_user_information(api, args, username, db, connection, dataset_directory):
     user = TwitterUser(dataset_directory)
     try:
         user.set_user_information(api.get_user(username))
 
         if args.output == 'csv' or args.output == 'all':
-            user.get_csv_output()
+            user.get_csv_output('users_file.csv', dataset_directory)
 
         if args.output == 'json' or args.output == 'all':
             user.get_json_output('users_file.json', dataset_directory)
 
         if args.output == 'database' or args.output == 'all':
             user_tuple = user.get_tuple_output()
-            # print(user_tuple)
             row_id = db.create_user(connection, user_tuple)
-            print("[test_user] ROW_ID: " + str(row_id))
-            print()
+
     except tweepy.error.TweepError as e:
         print("[main.test_user] Error: " + str(e))
 
-        # tweets
-        print("lo estoy flipando")
-        tm = TweetMiner()
-        tm.mine_tweets(api, username, ntweets)
-        if args.output == 'json' or args.output == 'all':
-            tm.get_json_output('tweets_file.json', dataset_directory)
-            print("in json")
 
-        if args.output == 'database' or args.output == 'all':
-            tm.add_tweets_to_database(db, connection)
-            print("in database")
+def get_tweets_information(api, args, username, db, connection, dataset_directory, ntweets):
+    tm = TweetMiner()
+    tweets_instances, tweets = tm.mine_tweets(api, username, ntweets)
+
+    if args.output == 'json' or args.output == 'all':
+        for tweet in tweets_instances:
+            tweet.get_json_output('tweets_file.json', dataset_directory)
+
+    if args.output == 'csv' or args.output == 'all':
+        for tweet in tweets_instances:
+            tweet.get_csv_output('tweets_file.csv', dataset_directory)
+
+    if args.output == 'database' or args.output == 'all':
+        for tweet in tweets_instances:
+            db.create_tweet(connection, tweet.get_tuple_output())
 
 
 def config_database(db_name):
@@ -155,12 +157,13 @@ def main():
     api = config_twitter_api()
 
     if args.account:
-        test_user(api, args, args.account, db, connection, dataset_directory, args.tweets_number)
+        get_user_information(api, args, args.account, db, connection, dataset_directory)
+        get_tweets_information(api, args, args.account, db, connection, dataset_directory, args.tweets_number)
 
     if args.account_list:
         for account in args.account_list:
-            test_user(api, args, account, db, connection, dataset_directory, args.tweets_number)
-
+            get_user_information(api, args, account, db, connection, dataset_directory)
+            get_tweets_information(api, args, account, db, connection, dataset_directory, args.tweets_number)
 
 
 if __name__ == '__main__':
