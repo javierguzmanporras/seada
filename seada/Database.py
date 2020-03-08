@@ -30,13 +30,14 @@ class Database:
         :return:
         """
 
-        user_sql_query = "CREATE TABLE user(id integer PRIMARY KEY, name text, screen_name text, location text," \
-                         "description test, url text, protected text, followers_count text, friends_count text," \
-                         "listed_count text, created_at text, favourites_count text, geo_enabled text, verified text," \
-                         "statuses_count text, profile_image_url_https text, profile_banner_url text, " \
-                         "default_profile text, default_profile_image text, raw_user text)"
+        user_sql_query = "CREATE TABLE IF NOT EXISTS user(id integer PRIMARY KEY, name text, screen_name text, " \
+                         "location text, description test, url text, protected text, followers_count text, " \
+                         "friends_count text, listed_count text, created_at text, favourites_count text, " \
+                         "geo_enabled text, verified text, statuses_count text, profile_image_url_https text, " \
+                         "profile_banner_url text, default_profile text, default_profile_image text, raw_user text)"
 
-        tweet_sql_query = "CREATE TABLE tweet(id integer PRIMARY KEY, created_at text, text text, truncated text," \
+        tweet_sql_query = "CREATE TABLE IF NOT EXISTS tweet(id integer PRIMARY KEY, created_at text, text text, " \
+                          "truncated text," \
                           "source text, in_reply_to_status_id_str text, in_reply_to_user_id_str text," \
                           "in_reply_to_screen_name text, coordinates text, place text, contributors text, " \
                           "is_quote_status text, retweet_count text, favorite_count text, favorited text, " \
