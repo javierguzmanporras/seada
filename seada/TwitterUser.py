@@ -1,17 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import json
-import csv
 import datetime
-import Utils
+import SeadaUtils
 
 
 class TwitterUser:
     """Information about a Twitter user"""
 
     def __init__(self, dataset_directory):
-        # Account user information (19)
+        # Account user information
         self.id = ""
         self.name = ""
         self.screen_name = ""
@@ -31,27 +29,12 @@ class TwitterUser:
         self.profile_banner_url = ""
         self.default_profile = ""
         self.default_profile_image = ""
-        # other information about user (3)
+        # other information about user
         self.tweets_average = ""
         self.likes_average = ""
         self.raw_json_user = ""
         self.user = {}
         self.dataset_directory = dataset_directory
-
-    @staticmethod
-    def __json_to_string(json_information):
-        """
-        Convert object json to string.
-        :param json_information: The object that convert to string
-        :return: json string or None with errors.
-        """
-        try:
-            json_str = json.dumps(json_information._json)
-            return json_str
-        except json.JSONDecodeError as e:
-            print("[json_to_string] Error " + str(e))
-
-        return None
 
     def set_user_information(self, user):
         """
@@ -59,8 +42,7 @@ class TwitterUser:
         :param user: tweepy object user
         :return: None
         """
-        # self.raw_json_user = self.__json_to_string(user)
-        self.raw_json_user = Utils.Utils.json_to_string(user)
+        self.raw_json_user = SeadaUtils.SeadaUtils.json_to_string(user)
         self.id = user.id
         self.user['id'] = user.id
         self.name = user.name
@@ -103,72 +85,35 @@ class TwitterUser:
             self.user['profile_banner_url'] = user.profile_banner_url
         except AttributeError:
             self.user['profile_banner_url'] = ""
-
         td = datetime.datetime.today() - self.created_at
-        print("[user] td: %s" % str(td))
-        print("[user] td: {}".format(td))
+        # print("[user] td: %s" % str(td))
+        # print("[user] td: {datatime}".format(datatime=td))
 
         if td.days > 0:
-            self.tweets_average = round(float(self.statuses_count / (td.days * 1.0)), 2)
-            self.likes_average = round(float(self.favourites_count / (td.days * 1.0)), 2)
+            self.tweets_average = round(float(self.statuses_count / (td.days * 1.0)), 3)
+            self.likes_average = round(float(self.favourites_count / (td.days * 1.0)), 3)
         else:
             self.tweets_average = self.statuses_count
             self.likes_average = self.favourites_count
 
-        print("[user] tweets average: %s" % str(self.tweets_average))
-        print("[user] likes average: %s" % str(self.likes_average))
-        print("[user] profile image url: %s" % str(self.profile_image_url_https))
-        print("[user] profile banner url: %s" % str(self.profile_banner_url))
+        # print("[user] tweets average: %s" % str(self.tweets_average))
+        # print("[user] likes average: %s" % str(self.likes_average))
 
-    def get_csv_output(self):
+    def get_csv_output(self, file_name, dataset_directory):
         """
         Generate a cvs file from user information instance. If the file exists, append info in new row.
         :return: a new csv file or a new row.
         """
-        file_name = 'user_file.csv'
-        path_file = self.dataset_directory + '/' + file_name
-        with open(file=path_file, mode='a+') as user_file:
-            user_writer = csv.writer(user_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            # user_writer.writerow(["", "InfoBot Report"])
-            # user_writer.writerow(["", ">>> Date:", datetime.datetime.now().strftime('%Y-%m-%d')])
-            # user_writer.writerow(["", ">>> Time:", datetime.datetime.now().strftime('%H:%M')])
-            # user_writer.writerow(["", ">>> Analyzed user:", self.screen_name])
-            user_writer.writerow([self.id,
-                                  self.name,
-                                  self.screen_name,
-                                  self.location,
-                                  self.description,
-                                  self.url,
-                                  self.protected,
-                                  self.followers_count,
-                                  self.friends_count,
-                                  self.listed_count,
-                                  self.created_at,
-                                  self.favourites_count,
-                                  self.geo_enabled,
-                                  self.verified,
-                                  self.statuses_count,
-                                  self.profile_image_url_https,
-                                  self.profile_banner_url,
-                                  self.default_profile,
-                                  self.default_profile_image])
-
-    # def get_json_output_old(self):
-    #     """
-    #     Generate a json file from user information. If the file exists, append new item.
-    #     :return: a new json file, or a new item
-    #     """
-    #     file_name = 'user_file.json'
-    #     path_file = self.dataset_directory + '/' + file_name
-    #     with open(path_file, mode='a+') as user_file:
-    #         json.dump(self.user, user_file)
+        item = list(self.get_tuple_output())
+        item.pop(-1)
+        SeadaUtils.SeadaUtils.get_csv_output(file_name, dataset_directory, item)
 
     def get_json_output(self, file_name, dataset_directory):
         """
         Generate a json file from user information. If the file exists, append new item.
         :return: a new json file, or a new item
         """
-        Utils.Utils.get_json_output(file_name, dataset_directory, self.user)
+        SeadaUtils.SeadaUtils.get_json_output(file_name, dataset_directory, self.user)
 
     def get_tuple_output(self):
         """
