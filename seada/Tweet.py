@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from Utils import *
+from SeadaUtils import *
 
 
 class Tweet:
@@ -47,7 +47,7 @@ class Tweet:
         :param item:
         :return:
         """
-        self.raw_tweet = Utils.json_to_string(item)
+        self.raw_tweet = SeadaUtils.json_to_string(item)
         self.created_at = item.created_at
         self.tweet['created_at'] = str(item.created_at)
         self.id = item.id
@@ -143,6 +143,15 @@ class Tweet:
 
         for key, val in self.hashtags.items():
             print(str(key) + " => " + str(val))
+
+    def get_json_output(self, file_name, dataset_directory):
+        SeadaUtils.get_json_output(file_name, dataset_directory, self.tweet)
+
+    def get_csv_output(self, file_name, dataset_directoy):
+        item = list(self.get_tuple_output())
+        item.pop(-1)
+        SeadaUtils.get_csv_output(file_name, dataset_directoy, item)
+
 
     def get_tuple_output(self):
         """
