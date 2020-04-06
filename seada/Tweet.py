@@ -52,8 +52,14 @@ class Tweet:
         self.tweet['created_at'] = str(item.created_at)
         self.id = item.id
         self.tweet['id'] = item.id
-        self.text = item.full_text
-        self.tweet['text'] = item.full_text
+
+        try:
+            self.text = item.full_text
+            self.tweet['text'] = item.full_text
+        except AttributeError:
+            self.text = item.text
+            self.tweet['text'] = item.text
+
         self.truncated = item.truncated
         self.tweet['truncated'] = item.truncated
         self.source = item.source
@@ -102,9 +108,6 @@ class Tweet:
         self.tweet['user_mentions'] = self.entities_user_mentions
         self.tweet['urls'] = self.entities_urls
 
-        #if self.truncated:
-        #    print(item.text_)
-
         #get lang
         if item.lang in self.languages:
             self.languages[item.lang] += 1
@@ -130,6 +133,8 @@ class Tweet:
             else:
                 self.hashtags[ht] = 1
 
+
+
     @classmethod
     def get_report(self):
         for key, val in self.languages.items():
@@ -152,6 +157,23 @@ class Tweet:
         item.pop(-1)
         SeadaUtils.get_csv_output(file_name, dataset_directoy, item)
 
+    def get_tuple_output_without_raw(self):
+        """
+        Generate a tuple with tweet information without raw information for input database
+        :return: A tuple with tweet information
+        """
+
+        # You could pickle/marshal/json your array and store it as binary/varchar/json field in your database.
+        hashtags_json = json.dumps(self.entities_hashtags)
+        user_mentions_json = json.dumps(self.entities_user_mentions)
+        urls_json = json.dumps(self.entities_urls)
+
+        tuple_tweet = (self.id, self.created_at, self.text, self.truncated, self.source,
+                       self.in_reply_to_status_id_str, self.in_reply_to_user_id_str, self.in_reply_to_screen_name,
+                       self.coordinates, self.place, self.contributors,
+                       self.is_quote_status, self.retweet_count, self.favorite_count, self.favorited, self.retweeted,
+                       self.possibly_sensitive, self.lang, hashtags_json, user_mentions_json, urls_json)
+        return tuple_tweet
 
     def get_tuple_output(self):
         """
@@ -169,6 +191,3 @@ class Tweet:
 
     # user
     # self.user_name = ""
-    #self.entities_hashtags = []
-    #self.entities_user_mentions = []
-    #self.entities_urls = []
