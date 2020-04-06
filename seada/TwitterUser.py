@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import datetime
+from datetime import datetime
 import SeadaUtils
+import json
+from elasticsearch import Elasticsearch
 
 
 class TwitterUser:
@@ -35,6 +37,7 @@ class TwitterUser:
         self.raw_json_user = ""
         self.user = {}
         self.dataset_directory = dataset_directory
+        self.elasticsearch = Elasticsearch()
 
     def set_user_information(self, user):
         """
@@ -85,7 +88,7 @@ class TwitterUser:
             self.user['profile_banner_url'] = user.profile_banner_url
         except AttributeError:
             self.user['profile_banner_url'] = ""
-        td = datetime.datetime.today() - self.created_at
+        td = datetime.today() - self.created_at
         # print("[user] td: %s" % str(td))
         # print("[user] td: {datatime}".format(datatime=td))
 
@@ -127,3 +130,43 @@ class TwitterUser:
                       self.default_profile_image, self.raw_json_user)
 
         return tuple_user
+
+    def ingest_user_information_to_elasticsearch(self):
+        index = "twitter-user"
+        doc_type = "user"
+        # doc_type = "new-tweet"
+        self.user['timestamp'] = '1585428004495'
+
+        response = self.elasticsearch.index(index=index, doc_type=doc_type, body=self.user)
+        print(response['result'])
+
+    def ingest_user_information_to_elasticsearch_v2(self):
+        index_name = "twitter-user"
+        #doc_type = "user"
+        # doc_type = "new-tweet"
+        self.user['@timestamp'] = datetime.now()
+
+        #response = self.elasticsearch.index(index=index, doc_type=doc_type, body=self.user)
+
+
+        with open('elastic/user_mapping_v2.json', 'r') as myfile:
+            data = myfile.read()
+
+        settings_file = json.loads(data)
+
+        print(type(settings_file))
+        print(settings_file)
+
+        #response = self.elasticsearch.indices.create(index=index_name, body=settings_file)
+        #print(response)
+        print()
+
+        response = self.elasticsearch.index(index=index_name, id=9, body=self.user)
+        print(response)
+
+
+
+
+
+
+
