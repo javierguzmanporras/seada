@@ -2,13 +2,16 @@
 # -*- coding: utf-8 -*-
 # DEASOS - Data Extraction and Analysis System from Open Sources
 
+#examples
+# python3 seada.py --account kinomakino
+
 import argparse
 import os
 import sys
-import tweepy
 from TwitterUser import *
 from Database import *
 from TweetMiner import *
+from TweetStreaming import *
 
 
 __version__ = 0.1
@@ -37,14 +40,26 @@ def parse_args():
     """
     parser = argparse.ArgumentParser(prog='seada.py',
                                      description='Sistema de Extracción y Análisis de Datos de fuentes Abiertas',
-                                     epilog='Enjoy the program! :)')
-    parser.add_argument('-a', '--account', metavar='ACCOUNT', type=str, help='User twitter account')
-    parser.add_argument('-al', '--account_list', metavar='ACCOUNT-LIST', type=str, nargs='+', help='User list twitter account')
-    parser.add_argument('-n', '--tweets_number', default=100, type=int, help='Number of tweets that will get from user')
+                                     epilog='Enjoy! :)')
+
+    group = parser.add_mutually_exclusive_group(required=True)
+
+    group.add_argument('-a', '--account', metavar='ACCOUNT', type=str, help='User twitter account')
+
+    group.add_argument('-al', '--account_list', metavar='ACCOUNT-LIST', type=str, nargs='+',
+                       help='User list twitter account')
+
+    group.add_argument('-s', '--streaming', type=str, nargs='+', help='Download twitter messages in real time.')
+
+    parser.add_argument('-n', '--tweets_number', default=100, type=int,
+                        help='Number of tweets that will get from user. Default=100.')
+
     parser.add_argument('-o', '--output', choices=['csv', 'json', 'database', 'all'], default='json',
-                        help='Types of output between json, csv or database. You can chose one or all of them.')
+                        help='Types of output between json, csv or database. Default=json.')
+
     parser.add_argument('-of', '--output_folder', default='dataset',
-                        help='Save the dataset output into specific folder')
+                        help='Save the dataset output into specific folder. Default=dataset')
+
     parser.add_argument('-v', '--version', action='version', version=f"%(prog)s {__version__}")
     args = parser.parse_args()
     return args
@@ -91,6 +106,8 @@ def get_user_information(api, args, username, db, connection, dataset_directory)
             user_tuple = user.get_tuple_output()
             row_id = db.create_user(connection, user_tuple)
 
+        user.ingest_user_information_to_elasticsearch_v2()
+
     except tweepy.error.TweepError as e:
         print("[main.test_user] Error: " + str(e))
 
@@ -110,6 +127,11 @@ def get_tweets_information(api, args, username, db, connection, dataset_director
     if args.output == 'database' or args.output == 'all':
         for tweet in tweets_instances:
             db.create_tweet(connection, tweet.get_tuple_output())
+
+
+def get_streaming(api, args, db, connection, dataset_directory):
+    ts = TweetStreaming()
+    ts.start(api, args.streaming, args, db, connection, dataset_directory)
 
 
 def config_database(db_name):
@@ -164,6 +186,9 @@ def main():
         for account in args.account_list:
             get_user_information(api, args, account, db, connection, dataset_directory)
             get_tweets_information(api, args, account, db, connection, dataset_directory, args.tweets_number)
+
+    if args.streaming:
+        get_streaming(api, args, db, connection, dataset_directory)
 
 
 if __name__ == '__main__':
