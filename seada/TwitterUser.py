@@ -149,7 +149,7 @@ class TwitterUser:
         #response = self.elasticsearch.index(index=index, doc_type=doc_type, body=self.user)
 
 
-        with open('elastic/user_mapping_v2.json', 'r') as myfile:
+        with open('elastic/user_mapping.json', 'r') as myfile:
             data = myfile.read()
 
         settings_file = json.loads(data)
