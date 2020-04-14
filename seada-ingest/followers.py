@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import tweepy
 import sys
+
+import tweepy
 from tqdm import tqdm
+
 
 class Followers:
 
