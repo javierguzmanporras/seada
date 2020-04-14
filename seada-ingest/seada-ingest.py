@@ -3,16 +3,18 @@
 # DEASOS - Data Extraction and Analysis System from Open Sources
 
 #examples
-# python3 seada.py --account kinomakino
+# python3 seada-ingest.py --account kinomakino
 
 import argparse
+import logging
 import os
 import sys
-from TwitterUser import *
+
 from Database import *
 from TweetMiner import *
 from TweetStreaming import *
-
+from ElasticsearchUtils import *
+from TwitterUser import *
 
 __version__ = 0.1
 
@@ -22,7 +24,9 @@ def banner():
     Function for print a banner
     """
     try:
-        banner_file = open("banner.txt", 'r')
+        seada_path = os.path.abspath(os.path.dirname(__file__))
+        path = os.path.join(seada_path, "../data/seada-ingest-banner.txt")
+        banner_file = open(path, 'r')
         for line in banner_file.readlines():
             print(line.replace("\n", ""))
         banner_file.close()
@@ -35,10 +39,10 @@ def banner():
 
 def parse_args():
     """
-    Method for get the arguments input of seada program.
+    Method for get the arguments input of seada-ingest program.
     :return: A Namespace class of argparse.
     """
-    parser = argparse.ArgumentParser(prog='seada.py',
+    parser = argparse.ArgumentParser(prog='seada-ingest.py',
                                      description='Sistema de Extracción y Análisis de Datos de fuentes Abiertas',
                                      epilog='Enjoy! :)')
 
@@ -77,7 +81,10 @@ def config_twitter_api():
         access_token = os.environ['ACCESS_TOKEN']
         access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
     except KeyError as e:
-        print('[main][config_twitter_api] Error, ' + str(e) + ' environment variable for access key not found.')
+        print('[seada-ingest.config_twitter_api] Critical error, ' +
+              str(e) + ' environment variable for access key not found.')
+        logging.critical('[seada-ingest.config_twitter_api] Critical error: ' +
+                         str(e) + ' environment variable for access key not found.')
         sys.exit(-1)
 
     try:
@@ -85,13 +92,14 @@ def config_twitter_api():
         auth.set_access_token(access_token, access_token_secret)
         api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
     except tweepy.TweepError as e:
-        print("[main][config_twitter_api] Fatal error with authentication process " + str(e))
+        print("[seada-ingest.config_twitter_api] Critical error with authentication process " + str(e))
+        logging.critical('[seada-ingest.config_twitter_api] Critical error with authentication process')
         sys.exit(-1)
 
     return api
 
 
-def get_user_information(api, args, username, db, connection, dataset_directory):
+def get_user_information(api, args, username, db, connection, dataset_directory, es_connect):
     user = TwitterUser(dataset_directory)
     try:
         user.set_user_information(api.get_user(username))
@@ -106,13 +114,16 @@ def get_user_information(api, args, username, db, connection, dataset_directory)
             user_tuple = user.get_tuple_output()
             row_id = db.create_user(connection, user_tuple)
 
-        user.ingest_user_information_to_elasticsearch_v2()
+        user_index_name = "twitter_user"
+        user_mapping_file = "elasticsearch_twitter_user_index_mapping.json"
+        es_connect.create_index(index_name=user_index_name, mapping_file=user_mapping_file)
+        es_connect.store_information_to_elasticsearch(index_name=user_index_name, info=user.user)
 
     except tweepy.error.TweepError as e:
         print("[main.test_user] Error: " + str(e))
 
 
-def get_tweets_information(api, args, username, db, connection, dataset_directory, ntweets):
+def get_tweets_information(api, args, username, db, connection, dataset_directory, ntweets, es_connect):
     tm = TweetMiner()
     tweets_instances, tweets = tm.mine_tweets(api, username, ntweets)
 
@@ -128,8 +139,15 @@ def get_tweets_information(api, args, username, db, connection, dataset_director
         for tweet in tweets_instances:
             db.create_tweet(connection, tweet.get_tuple_output())
 
+    tweet_index_name = "twitter_tweets"
+    tweet_mapping_file = "elasticsearch_twitter_tweets_index_mapping.json"
+    es_connect.create_index(index_name=tweet_index_name, mapping_file=tweet_mapping_file)
+    #for tweet in tweets_instances:
+        #es_connect.store_information_to_elasticsearch(index_name=tweet_index_name, info=tweet)
 
-def get_streaming(api, args, db, connection, dataset_directory):
+
+
+def get_streaming(api, args, db, connection, dataset_directory, es_connect):
     ts = TweetStreaming()
     ts.start(api, args.streaming, args, db, connection, dataset_directory)
 
@@ -159,36 +177,66 @@ def config_dataset_output(path):
             sys.exit(-1)
 
 
+def config_logging():
+    """
+    Config output logging file.
+    :return:
+    """
+    try:
+        seada_path = os.path.abspath(os.path.dirname(__file__))
+        path = os.path.join(seada_path, "../data/seada.log")
+        logging.basicConfig(filename=path, filemode='a', format='%(asctime)s %(levelname)s-%(message)s',
+                            datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
+        logging.info("seada-ingest started!")
+    except Exception as exception:
+        print(exception)
+        sys.exit(-1)
+
+
+def config_elasticsearch(es_host, es_port):
+    _es = None
+    _es = ElasticSearchUtils(es_host=es_host, es_port=es_port)
+    es_connection = _es.connect_elasticsearch()
+    if es_connection:
+        _es.es_connection = es_connection
+
+    return _es
+
+
 def main():
     args = parse_args()
+    config_logging()
     banner()
 
     print(vars(args))
+    print()
 
     dataset_directory = database_directory = args.output_folder
     database_name = 'seada_database.db'
     database_path = database_directory + '/' + database_name
 
     config_dataset_output(dataset_directory)
-
     db = None
-    connection = None
+    db_connection = None
     if args.output == 'database' or args.output == 'all':
-        db, connection = config_database(database_path)
+        db, db_connection = config_database(database_path)
 
+    es = config_elasticsearch('localhost', '9200')
     api = config_twitter_api()
 
     if args.account:
-        get_user_information(api, args, args.account, db, connection, dataset_directory)
-        get_tweets_information(api, args, args.account, db, connection, dataset_directory, args.tweets_number)
+        get_user_information(api, args, args.account, db, db_connection, dataset_directory, es_connect=es)
+        get_tweets_information(api, args, args.account, db, db_connection, dataset_directory, args.tweets_number,
+                               es_connect=es)
 
     if args.account_list:
         for account in args.account_list:
-            get_user_information(api, args, account, db, connection, dataset_directory)
-            get_tweets_information(api, args, account, db, connection, dataset_directory, args.tweets_number)
+            get_user_information(api, args, account, db, db_connection, dataset_directory, es_connect=es)
+            get_tweets_information(api, args, account, db, db_connection, dataset_directory, args.tweets_number,
+                                   es_connect=es)
 
     if args.streaming:
-        get_streaming(api, args, db, connection, dataset_directory)
+        get_streaming(api, args, db, db_connection, dataset_directory, es_connect=es)
 
 
 if __name__ == '__main__':
