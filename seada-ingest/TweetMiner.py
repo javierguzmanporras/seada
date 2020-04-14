@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import tweepy
-from Tweet import *
 from tqdm import tqdm
+
+from Tweet import *
 
 
 class TweetMiner:
