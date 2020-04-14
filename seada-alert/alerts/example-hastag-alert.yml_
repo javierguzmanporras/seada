@@ -1,0 +1,34 @@
+# Alert when ...
+
+# (Required)
+# Rule name, must be unique
+name: Example hastag alert
+
+# (Required)
+# Type of alert.
+type: hastag
+
+# (Required)
+# List of terms
+list:
+  - "#coronavirus"
+  - "#covid-19"
+  - "#COVID19"
+
+# (Required)
+# The alert is use when a match is found
+alert:
+  - "email"
+  - "telegram"
+
+# (required, email specific)
+# a list of email addresses to send alerts to
+email:
+  - "seada-alert@example.com"
+
+# (required, telegram specific)
+#
+telegram:
+  - username: seada_alert_bot
+  - token: 1262332778:AAH5EDRl25ZpHS5NoLKytiI7Bieg-YWrdjg
+  - chatid: 366665070

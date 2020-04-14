@@ -1,0 +1,7 @@
+# Config file of seada-alert
+
+# Folder that contains the alarm's rule yaml files
+# Any .yaml file will be loaded as a rule
+alerts_folder: alerts
+
+
