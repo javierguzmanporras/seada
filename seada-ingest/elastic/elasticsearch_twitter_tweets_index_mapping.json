@@ -1,0 +1,35 @@
+{
+  "settings": {
+    "number_of_shards": "1",
+    "number_of_replicas":"2"
+  },
+  "mappings": {
+    "properties": {
+      "@timestamp": { "type":  "date" },
+      "created_at": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "id": { "type": "long" },
+      "text": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "truncated": { "type": "boolean" },
+      "source": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "in_reply_to_status_id_str": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "in_reply_to_user_id_str": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "in_reply_to_screen_name": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "coordinates": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "place": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "contributors": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "is_quote_status": { "type": "boolean" },
+      "retweet_count": { "type": "long" },
+      "favorite_count": { "type": "long" },
+      "favorited": { "type": "boolean" },
+      "retweeted": { "type": "boolean" },
+      "possibly_sensitive": { "type": "boolean" },
+      "lang": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "entities_hashtags": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "entities_user_mentions": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "entities_urls": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "user_id": { "type": "long" },
+      "user_name": { "type":  "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "user_screen_name": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}}
+    }
+  }
+}
