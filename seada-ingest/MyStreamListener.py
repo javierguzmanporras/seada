@@ -1,6 +1,5 @@
 import tweepy
 
-from TwitterUser import *
 from Tweet import *
 
 
