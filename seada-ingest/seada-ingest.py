@@ -183,7 +183,7 @@ def config_logging():
     """
     try:
         seada_path = os.path.abspath(os.path.dirname(__file__))
-        path = os.path.join(seada_path, "../data/seada.log")
+        path = os.path.join(seada_path, "../data/seada-ingest.log")
         logging.basicConfig(filename=path, filemode='a', format='%(asctime)s %(levelname)s-%(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
         logging.info("seada-ingest started!")

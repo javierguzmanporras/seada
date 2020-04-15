@@ -9,12 +9,13 @@ name: Example term alert
 type: term
 
 # (Required)
+# elasticsearch index
+index: twitter_tweets
+
+# (Required)
 # List of terms
 list:
-  - "ministerio de sanidad"
-  - "ministerio del interior"
-  - "guardia civil"
-  - policia
+  - CiberCOVID19
 
 # (Required)
 # The alert is use when a match is found
@@ -28,7 +29,7 @@ emails:
   - seada-alert@example.com
 
 # (required, telegram specific)
-#
+# config info for telegram
 telegram:
   - username: seada_alert_bot
   - token: 1262332778:AAH5EDRl25ZpHS5NoLKytiI7Bieg-YWrdjg

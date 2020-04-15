@@ -3,6 +3,7 @@
 # DEASOS - Data Extraction and Analysis System from Open Sources
 
 import argparse
+import time
 import logging
 import os
 import sys
@@ -11,6 +12,8 @@ import yaml
 from Alert import *
 from Sender import *
 from elasticsearch import Elasticsearch
+from ElasticsearchUtils import *
+from time import sleep
 
 __version__ = 0.1
 
@@ -34,20 +37,20 @@ def banner():
         logging.warning(exception)
     
     
-def test_elastic():
-    es = Elasticsearch()
-    res = es.search(index="twitter-user", body={"query": {"match_all": {}}})
-    print("Got %d Hits:" % res['hits']['total']['value'])
-    for hit in res['hits']['hits']:
-        print(hit["_source"])
-        print(type(hit["_source"]))
-        if hit["_source"]["screen_name"] == "kinomakino":
-            print("RED ALERT!!!  send alarm!!")
+# def test_elastic():
+#     es = Elasticsearch()
+#     res = es.search(index="twitter-user", body={"query": {"match_all": {}}})
+#     print("Got %d Hits:" % res['hits']['total']['value'])
+#     for hit in res['hits']['hits']:
+#         print(hit["_source"])
+#         print(type(hit["_source"]))
+#         if hit["_source"]["screen_name"] == "kinomakino":
+#             print("RED ALERT!!!  send alarm!!")
 
 
-def send_telegram_message():
+def send_telegram_message(message):
     s = Sender()
-    s.sendMessageToBot("test")
+    s.sendMessageToBot(message)
 
 
 def parse_args():
@@ -66,14 +69,10 @@ def parse_args():
 
 def get_config(file_config):
 
-    print(file_config)
-
     with open (file_config) as file:
         config = yaml.safe_load(file)
 
-    print(type(config))
-    print(config)
-
+    # print(str(type(config)) + ": " + str(config))
     return config
 
 
@@ -96,7 +95,7 @@ def config_logging():
 def load_alerts(alerts_folder):
     n_alerts = 0
     alerts = []
-    print(alerts_folder)
+    # print(alerts_folder)
 
     for f in os.listdir(alerts_folder):
         if f.endswith('yml'):
@@ -108,6 +107,64 @@ def load_alerts(alerts_folder):
     return n_alerts, alerts
 
 
+def config_elasticsearch(es_host, es_port):
+    _es = None
+    _es = ElasticSearchUtils(es_host=es_host, es_port=es_port)
+    es_connection = _es.connect_elasticsearch()
+    if es_connection:
+        _es.es_connection = es_connection
+
+    return _es
+
+
+def search(es, alert):
+
+    query = {
+  "query": {
+    "bool": {
+      "should": [
+        { "match": { "text": "#VANESA"}}
+      ],
+      "minimum_should_match": 1
+    }
+  },
+  "_source": {
+    "includes": [ "user_name", "user_screen_name", "@timestamp", "text"]
+  }
+}
+    alarm_info = None
+    response = None
+
+    try:
+        response = es.es_connection.search(index=alert.index, body=query)
+    except:
+        print("Error with query!!")
+
+    if response:
+        if response['hits']['total']['value'] > 0:
+            print("Got %d Hits: RED ALERT!!!  send alarm!!" % response['hits']['total']['value'])
+            alarm_info = response['hits']['hits'][0]["_source"]
+
+    return alarm_info
+
+
+def send_alert(alert_config, alert_info):
+    print("sending alert...")
+    print()
+    print(alert_info)
+    print()
+    print(alert_config)
+
+    if "email" in alert_config.outputs:
+        print("Command email yeah!")
+
+    if "telegram" in alert_config.outputs:
+        send_telegram_message(message=alert_info)
+        print("Command telegram yeah!")
+
+    print("Alert sended...")
+
+
 def main():
     args = parse_args()
     config_logging()
@@ -116,23 +173,21 @@ def main():
     if args.config:
         config = get_config(file_config=args.config)
 
+    es = config_elasticsearch(config['es_host'], config['es_port'])
     n_alerts_loaded, alerts = load_alerts(config['alerts_folder'])
-
     print("[seada-alert] " + str(n_alerts_loaded) + " alerts loaded...")
-    print(alerts[0].name)
-    print(alerts[0].type)
-    print(alerts[0].list)
-    print(alerts[0].outputs)
-    print(alerts[0].emails)
-    print(alerts[0].telegram)
 
-    #test_elastic()
-    #send_telegram_message()
+    for alert in alerts:
+        print ("[seada-alert] Alert: " + str(alert))
 
-    # while
-        # realizar busqeda
-        # enviar alerta
-        # sleep 5 minutos
+    while True:
+        for alert in alerts:
+            response = search(es, alert)
+            if response:
+                send_alert(alert, response)
+
+        time.sleep(config['sleep_interval'])
+
 
 if __name__ == '__main__':
     main()

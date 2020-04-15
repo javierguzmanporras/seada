@@ -46,15 +46,12 @@ class Sender:
 
         logger = logging.getLogger('seada-alert-bot')
         logger.setLevel(logging.INFO)
-
         handler = RequestsHandler()
         formatter = LogstashFormatter()
         handler.setFormatter(formatter)
         logger.addHandler(handler)
-
         logger.setLevel(logging.INFO)
-
-        logger.error('Hello world!')
+        logger.error(message)
 
 
 
