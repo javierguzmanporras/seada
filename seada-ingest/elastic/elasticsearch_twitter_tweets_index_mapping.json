@@ -24,9 +24,9 @@
       "retweeted": { "type": "boolean" },
       "possibly_sensitive": { "type": "boolean" },
       "lang": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
-      "entities_hashtags": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
-      "entities_user_mentions": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
-      "entities_urls": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "hashtags": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "user_mentions": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "urls": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
       "user_id": { "type": "long" },
       "user_name": { "type":  "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
       "user_screen_name": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}}
