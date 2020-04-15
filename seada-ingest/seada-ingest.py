@@ -142,9 +142,8 @@ def get_tweets_information(api, args, username, db, connection, dataset_director
     tweet_index_name = "twitter_tweets"
     tweet_mapping_file = "elasticsearch_twitter_tweets_index_mapping.json"
     es_connect.create_index(index_name=tweet_index_name, mapping_file=tweet_mapping_file)
-    #for tweet in tweets_instances:
-        #es_connect.store_information_to_elasticsearch(index_name=tweet_index_name, info=tweet)
-
+    for tweet in tweets_instances:
+        es_connect.store_information_to_elasticsearch(index_name=tweet_index_name, info=tweet.tweet)
 
 
 def get_streaming(api, args, db, connection, dataset_directory, es_connect):
