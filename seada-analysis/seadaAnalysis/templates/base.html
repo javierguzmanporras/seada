@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+        {% include 'partials/sidebar.html' %}
+    <!-- End of Sidebar -->
+
+    <!-- Topbar -->
+        {% include 'partials/topbar.html' %}
+    <!-- End of Topbar -->
+
+      <nav>
+          <a href="{% url 'dashboard' %}">Dashboard</a>
+      </nav>
+
+
+
+    {% block content %}{% endblock %}
+
+    <!-- Footer -->
+        {% include 'partials/footer.html' %}
+    <!-- End of Footer -->
+
+</body>
+</html>
