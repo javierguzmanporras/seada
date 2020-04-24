@@ -1,55 +1,80 @@
-{% extends 'base.html' %}
+{% extends 'base_2col.html' %}
+{% load static %}
 
 {% block title %}{{ title }}{% endblock %}
 
-{% block content %}
+{% block main-content %}
     <h1>Dashboard</h1>
 
-    <div id="container" style="width: 50%;">
-        <canvas id="population-chart" data-url="{% url 'chart_data' %}"></canvas>
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Area Chart -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <!-- card header -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Population-chart</h6>
+                </div>
+                <!-- card header -->
+                <div class="card-body">
+                    <div class="chart-area">
+                        <!-- bar chart -->
+                        <div id="container" style="width: 100%;">
+                            <canvas id="population-chart" data-url="{% url 'chart_data' %}"></canvas>
+                        </div>
+                        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+                        <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+                        <script src="{% static 'dashboard/bar_chart.js' %}"></script>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <!-- card header -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">matplotlib chart</h6>
+                </div>
+                <!-- card header -->
+                <div class="card-body">
+                    <div class="chart-area">
+                        <!-- chart content-->
+                        <img src="test/" width="600px" />
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
 
-     <script>
 
-    $(function () {
 
-      var $populationChart = $("#population-chart");
-      $.ajax({
-        url: $populationChart.data("url"),
-        success: function (data) {
 
-          var ctx = $populationChart[0].getContext("2d");
 
-          new Chart(ctx, {
-            type: 'bar',
-            data: {
-              labels: data.labels,
-              datasets: [{
-                label: 'Population',
-                backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe'],
-                data: data.data
-              }]
-            },
-            options: {
-              responsive: true,
-              legend: {
-                position: 'top',
-              },
-              title: {
-                display: true,
-                text: 'Population Bar Chart'
-              }
-            }
-          });
+<!--    <script src="{% static 'dashboard/hello.js' %}"></script>-->
 
-        }
-      });
 
-    });
+    <!-- bar chart -->
+<!--    <div id="container" style="width: 50%;">-->
+<!--        <canvas id="population-chart" data-url="{% url 'chart_data' %}"></canvas>-->
+<!--    </div>-->
+<!--    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>-->
+<!--    <script src="{% static 'dashboard/bar_chart.js' %}"></script>-->
 
-  </script>
+<!--     time line chart-->
+<!--    <div id="container2" style="width: 100%;">-->
+<!--		<canvas id="time_line_chart" data-url="{% url 'time_line_data' %}"></canvas>-->
+<!--	</div>-->
+<!--    <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>-->
+<!--    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>-->
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.bundle.js"></script>-->
+<!--    <script src="{% static 'dashboard/timeline_chart2.js' %}"></script>-->
+
+
+
+
+
 
 {% endblock %}
