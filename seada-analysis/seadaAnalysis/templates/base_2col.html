@@ -4,12 +4,30 @@
 
 <div class="container-fluid">
     <div class="row" >
-        <div class="col-md-2">
-            {% block sidebar %}{% endblock %}
-        </div>
-        <div class="col-md">
+        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+            <div class="sidebar-sticky">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">
+                            Dashboard
+                        </a>
+                    </li>
+
+                </ul>
+
+            </div>
+        </nav>
+
+        <main class="col-md-9 ml-sm-auto col-lg-10 px-4" role="main">
             {% block main-content %}{% endblock %}
-        </div>
+        </main>
+
+
+<!--        <div class="col-md-2 d-none d-md-block bg-light sidebar"></div> -->
+
+<!--        <div class="col-md">-->
+<!--            -->
+<!--        </div>-->
     </div>
 </div>
 

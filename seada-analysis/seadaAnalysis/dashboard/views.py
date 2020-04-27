@@ -3,15 +3,97 @@ from django.http import JsonResponse
 
 from elasticsearch import Elasticsearch
 from ElasticsearchUtils import *
+from datetime import datetime
+
+
+def get_num_users_protected_and_verified():
+    """
+    Get total of users with verified account in BBDD
+    :return: int, total of users
+    """
+    query = {
+      "size": 0,
+      "aggregations": {
+        "protected": {"terms": {"field": "protected"}},
+        "verified": {"terms": {"field": "verified"}}
+      }
+    }
+    es_host = "127.0.0.1"
+    es_port = "9200"
+    index = 'twitter_user'
+    response = None
+    total = 0
+    verified = 0
+    not_verified = 0
+    verified_percentage = 0
+    protected = 0
+    not_protected = 0
+    protected_percentage = 0
+
+    es = config_elasticsearch(es_host=es_host, es_port=es_port)
+    response = search(es=es, index=index, query=query)
+
+    if response:
+        total = response['hits']['total']['value']
+        for bucket in response['aggregations']['verified']['buckets']:
+            if bucket['key_as_string'] == "true":
+                verified = bucket['doc_count']
+            else:
+                not_verified = bucket['doc_count']
+
+        for bucket in response['aggregations']['protected']['buckets']:
+            if bucket['key_as_string'] == "true":
+                protected = bucket['doc_count']
+            else:
+                not_protected = bucket['doc_count']
+
+        verified_percentage = (verified / total) * 100
+        protected_percentage = (protected / total) * 100
+
+    return verified_percentage, protected_percentage
+
+
+def get_num(index):
+    """
+    Get total users storaged in BBDD
+    :return: int total of users
+    """
+    query = {
+      "size": 0,
+      "query": {
+        "match_all": {}
+      }
+    }
+
+    value = None
+    es_host = "127.0.0.1"
+    es_port = "9200"
+    es = config_elasticsearch(es_host=es_host, es_port=es_port)
+    response = search(es=es, index=index, query=query)
+
+    if response:
+        value = response['hits']['total']['value']
+
+    return value
 
 
 def dashboard(request):
 
     get_time_line_data(request=None)
 
+    _verified_percentage, _protected_percentage = get_num_users_protected_and_verified()
+
     template = 'dashboard/dashboard.html'
     context = {
-        'title': 'Django chart.js'
+        'title': 'Django chart.js',
+        'users_card_tittle': 'Users in BBDD',
+        'users_card_number': get_num(index='twitter_user'),
+        'tweets_card_tittle': 'Tweets in BBDD',
+        'tweets_card_number': get_num(index='twitter_tweets'),
+        'protected_users_card_tittle': 'Protected',
+        'protected_users_card_number': _protected_percentage,
+        'verified_users_card_tittle': 'Verified',
+        'verified_users_card_number': _verified_percentage
     }
     return render(request, template, context)
 
@@ -36,14 +118,11 @@ def config_elasticsearch(es_host, es_port):
 
 
 def search(es, index, query):
-
     response = None
-
     try:
         response = es.es_connection.search(index=index, body=query)
     except:
         print("Error with query!!")
-
     return response
 
 
@@ -114,7 +193,6 @@ def get_time_line_data(request):
 
     if response:
         hits = response['hits']['hits']
-        print("type hits: " + str(type(hits)))
         for hit in hits:
             labels.append(hit['_source']['created_at'])
             if hit['_source']['text'].startswith("RT @"):
@@ -131,6 +209,87 @@ def get_time_line_data(request):
 
     #return JsonResponse(data=output_data)
     return data, labels
+
+
+def get_time_line_data_v2(request, user):
+    """
+
+    :param request:
+    :return:
+    """
+    query = {
+        "size": 20,
+        "query": {
+            "bool": {
+                "should": [
+                    {"match": {"user_screen_name": user}}
+                ],
+                "minimum_should_match": 1
+            }
+        },
+        "sort": [
+            {
+                "created_at.keyword": {"order": "desc"}
+            }
+        ],
+        "_source": {
+            "includes": ["id", "user_screen_name", "created_at", "text"]
+        }
+    }
+
+    query2 = {
+      "size": 20,
+      "query": {
+        "bool": {
+          "should": [
+            { "match": {
+              "user_screen_name": {
+                "query": "complejolambda Victor_Fdz",
+                "operator": "or"
+              }}
+            }
+          ],
+          "minimum_should_match": 1
+        }
+      },
+      "sort": [
+        {
+          "created_at.keyword": {"order": "desc"}
+        }
+      ],
+      "_source": {
+        "includes": [ "id", "user_screen_name", "created_at", "text"]
+      }
+    }
+
+    es_host = "127.0.0.1"
+    es_port = "9200"
+    index = 'twitter_tweets'
+    es = config_elasticsearch(es_host=es_host, es_port=es_port)
+    response = search(es=es, index=index, query=query)
+
+    data = []
+
+    if response:
+        hits = response['hits']['hits']
+        for hit in hits:
+            item = {
+                'x': int(datetime.strptime(hit['_source']['created_at'], '%Y-%m-%d %H:%M:%S').strftime('%s')) * 1000,
+                'description': hit['_source']['created_at'] + "\n" + hit['_source']['text'],
+                'name': hit['_source']['user_screen_name'],
+                'label': hit['_source']['user_screen_name'],
+                # 'dataLabels': {
+                #                 'color': '#78f',
+                #                 'borderColor': 'blue',
+                #                 'backgroundColor': '#444',
+                #                 'style': {'textOutline': 0}
+                # }
+            }
+            data.append(item)
+
+    return JsonResponse(data, safe=False)
+
+
 
 import matplotlib.pyplot as plt
 import numpy as np

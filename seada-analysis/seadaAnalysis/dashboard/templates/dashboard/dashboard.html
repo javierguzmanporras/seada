@@ -6,6 +6,159 @@
 {% block main-content %}
     <h1>Dashboard</h1>
 
+    <!-- Content Row -->
+    <div class="row">
+        <!-- User card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">{{ users_card_tittle }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ users_card_number }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <img src="{% static 'dashboard/svg/server.svg' %}" alt="" width="50" height="50" title="database">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Tweets card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">{{ tweets_card_tittle }}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ tweets_card_number }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <img src="{% static 'dashboard/svg/card-text.svg' %}" alt="" width="50" height="50" title="database">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Protected card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">{{protected_users_card_tittle}}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{protected_users_card_number}} %</div>
+                        </div>
+                        <div class="col-auto">
+                            <img src="{% static 'dashboard/svg/shield-shaded.svg' %}" alt="" width="50" height="50" title="database">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Verified card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">{{verified_users_card_tittle}}</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{verified_users_card_number}} %</div>
+                        </div>
+                        <div class="col-auto">
+                            <img src="{% static 'dashboard/svg/person-check-fill.svg' %}" alt="" width="50" height="50" title="database">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Area Chart -->
+        <div class="col-lg">
+            <div class="card shadow">
+                <!-- card header -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Timeline</h6>
+                </div>
+                 <!-- card header -->
+                <div class="card-body">
+                    <div class="chart-area">
+                        <!-- bar chart -->
+                        <div id="time_line_container" style="width: 100%;">
+                            <canvas id="time-line-chart" data-url="{% url 'time_line_data_v3' 'complejolambda' %}"></canvas>
+                        </div>
+                        <script src="https://code.highcharts.com/highcharts.js"></script>
+                        <script src="https://code.highcharts.com/modules/timeline.js"></script>
+                        <script src="{% static 'dashboard/highcharts_timeline_v2.js' %}"></script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Area Chart -->
+        <div class="col-lg">
+            <div class="card shadow">
+                <!-- card header -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Timeline</h6>
+                </div>
+                 <!-- card header -->
+                <div class="card-body">
+                    <div class="chart-area">
+                        <!-- bar chart -->
+                        <div id="time_line_container_2" style="width: 100%;">
+                            <canvas id="time-line-chart_2" data-url="{% url 'time_line_data_v3' 'Victor_Fdz' %}"></canvas>
+                        </div>
+                        <script src="https://code.highcharts.com/highcharts.js"></script>
+                        <script src="https://code.highcharts.com/modules/timeline.js"></script>
+                        <script src="{% static 'dashboard/highcharts_timeline_user2.js' %}"></script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+<!--    &lt;!&ndash; Content Row &ndash;&gt;-->
+<!--    <div class="row">-->
+<!--        &lt;!&ndash; Area Chart &ndash;&gt;-->
+<!--        <div class="col-lg">-->
+<!--            <div class="card shadow">-->
+<!--                &lt;!&ndash; card header &ndash;&gt;-->
+<!--                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">-->
+<!--                    <h6 class="m-0 font-weight-bold text-primary">Timeline</h6>-->
+<!--                </div>-->
+<!--                 &lt;!&ndash; card header &ndash;&gt;-->
+<!--                <div class="card-body">-->
+<!--                    <div class="chart-area">-->
+<!--                        &lt;!&ndash; bar chart &ndash;&gt;-->
+<!--                        <div id="time_line_container" style="width: 100%;">-->
+<!--                            <canvas id="time-line-chart" data-url="{% url 'time_line_data_v2' %}"></canvas>-->
+<!--                        </div>-->
+<!--                        <script src="https://code.highcharts.com/highcharts.js"></script>-->
+<!--                        <script src="https://code.highcharts.com/modules/timeline.js"></script>-->
+<!--                        <script src="{% static 'dashboard/highcharts_timeline_v2.js' %}"></script>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+
 
     <!-- Content Row -->
     <div class="row">
