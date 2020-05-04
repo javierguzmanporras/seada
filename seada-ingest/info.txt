@@ -1,0 +1,24 @@
+status methods
+API.retweets_of_me: Returns the 20 most recent tweets of the authenticated user that have been retweeted by others.
+API.mentions_timeline: Returns the 20 most recent mentions, including retweets.
+
+block methds
+API.blocks: Returns an array of user objects that the authenticating user is blocking.
+
+Spam reporting methods
+API.report_spam: The user specified in the id is blocked by the authenticated user and reported as a spammer.
+
+Saved searches methods
+API.saved_searches(): Returns the authenticated user’s saved search queries.
+API.get_saved_search: Retrieve the data for a saved search owned by the authenticating user specified by the given id.
+
+Help Methods
+API.search: Returns a collection of relevant Tweets matching a specified query.
+
+Trends Methods
+API.trends_available: Returns the locations that Twitter has trending topic information for
+API.trends_place: Returns the top 50 trending topics for a specific WOEID
+
+Geo Methods
+API.reverse_geocode: Given a latitude and longitude, looks for places (cities and neighbourhoods) whose IDs can be specified in a call to update_status() to appear as the name of the location
+API.geo_id: Given id of a place, provide more details about that place.

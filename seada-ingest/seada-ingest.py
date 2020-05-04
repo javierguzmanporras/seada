@@ -15,6 +15,7 @@ from TweetMiner import *
 from TweetStreaming import *
 from ElasticsearchUtils import *
 from TwitterUser import *
+from Favorites import *
 
 __version__ = 0.1
 
@@ -104,15 +105,15 @@ def get_user_information(api, args, username, db, connection, dataset_directory,
     try:
         user.set_user_information(api.get_user(username))
 
-        if args.output == 'csv' or args.output == 'all':
-            user.get_csv_output('users_file.csv', dataset_directory)
-
-        if args.output == 'json' or args.output == 'all':
-            user.get_json_output('users_file.json', dataset_directory)
-
-        if args.output == 'database' or args.output == 'all':
-            user_tuple = user.get_tuple_output()
-            row_id = db.create_user(connection, user_tuple)
+        # if args.output == 'csv' or args.output == 'all':
+        #     user.get_csv_output('users_file.csv', dataset_directory)
+        #
+        # if args.output == 'json' or args.output == 'all':
+        #     user.get_json_output('users_file.json', dataset_directory)
+        #
+        # if args.output == 'database' or args.output == 'all':
+        #     user_tuple = user.get_tuple_output()
+        #     row_id = db.create_user(connection, user_tuple)
 
         user_index_name = "twitter_user"
         user_mapping_file = "elasticsearch_twitter_user_index_mapping.json"
@@ -127,17 +128,17 @@ def get_tweets_information(api, args, username, db, connection, dataset_director
     tm = TweetMiner()
     tweets_instances, tweets = tm.mine_tweets(api, username, ntweets)
 
-    if args.output == 'json' or args.output == 'all':
-        for tweet in tweets_instances:
-            tweet.get_json_output('tweets_file.json', dataset_directory)
-
-    if args.output == 'csv' or args.output == 'all':
-        for tweet in tweets_instances:
-            tweet.get_csv_output('tweets_file.csv', dataset_directory)
-
-    if args.output == 'database' or args.output == 'all':
-        for tweet in tweets_instances:
-            db.create_tweet(connection, tweet.get_tuple_output())
+    # if args.output == 'json' or args.output == 'all':
+    #     for tweet in tweets_instances:
+    #         tweet.get_json_output('tweets_file.json', dataset_directory)
+    #
+    # if args.output == 'csv' or args.output == 'all':
+    #     for tweet in tweets_instances:
+    #         tweet.get_csv_output('tweets_file.csv', dataset_directory)
+    #
+    # if args.output == 'database' or args.output == 'all':
+    #     for tweet in tweets_instances:
+    #         db.create_tweet(connection, tweet.get_tuple_output())
 
     tweet_index_name = "twitter_tweets"
     tweet_mapping_file = "elasticsearch_twitter_tweets_index_mapping.json"
@@ -223,6 +224,11 @@ def main():
     es = config_elasticsearch('localhost', '9200')
     api = config_twitter_api()
 
+    # # Test
+    # fav = Favorites()
+    # fav.get_user_favorites(api,"")
+    # sys.exit(0)
+
     if args.account:
         get_user_information(api, args, args.account, db, db_connection, dataset_directory, es_connect=es)
         get_tweets_information(api, args, args.account, db, db_connection, dataset_directory, args.tweets_number,
@@ -237,6 +243,7 @@ def main():
     if args.streaming:
         get_streaming(api, args, db, db_connection, dataset_directory, es_connect=es)
 
+    sys.exit(0)
 
 if __name__ == '__main__':
     main()

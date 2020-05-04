@@ -1,0 +1,18 @@
+{% load static %}
+
+<div class="sidebar-sticky">
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link active" href="/dashboard/">
+                <img src="{% static 'svg/dashboard.svg' %}" alt="" width="16" height="16" title="people">
+                Dashboard
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="{% url 'userlist' %}">
+                <img src="{% static 'svg/people.svg' %}" alt="" width="16" height="16" title="people">
+                User List
+            </a>
+        </li>
+    </ul>
+</div>

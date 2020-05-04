@@ -6,7 +6,7 @@
   "mappings": {
     "properties": {
       "@timestamp": { "type":  "date" },
-      "created_at": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "created_at": {"type": "date"},
       "id": { "type": "long" },
       "text": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
       "truncated": { "type": "boolean" },

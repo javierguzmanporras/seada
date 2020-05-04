@@ -65,7 +65,8 @@ class TwitterUser:
         self.listed_count = user.listed_count
         self.user['listed_count'] = user.listed_count
         self.created_at = user.created_at
-        self.user['created_at'] = str(user.created_at)
+        # self.user['created_at'] = str(user.created_at)
+        self.user['created_at'] = user.created_at
         self.favourites_count = user.favourites_count
         self.user['favourites_count'] = user.favourites_count
         self.geo_enabled = user.geo_enabled

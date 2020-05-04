@@ -5,29 +5,14 @@
 <div class="container-fluid">
     <div class="row" >
         <nav class="col-md-2 d-none d-md-block bg-light sidebar">
-            <div class="sidebar-sticky">
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">
-                            Dashboard
-                        </a>
-                    </li>
-
-                </ul>
-
-            </div>
+                <!-- sidebar -->
+                {% include 'sidebar.html' %}
+                <!-- End of sidebar -->
         </nav>
 
         <main class="col-md-9 ml-sm-auto col-lg-10 px-4" role="main">
             {% block main-content %}{% endblock %}
         </main>
-
-
-<!--        <div class="col-md-2 d-none d-md-block bg-light sidebar"></div> -->
-
-<!--        <div class="col-md">-->
-<!--            -->
-<!--        </div>-->
     </div>
 </div>
 

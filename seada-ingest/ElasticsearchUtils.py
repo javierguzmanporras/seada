@@ -46,7 +46,7 @@ class ElasticSearchUtils:
                 print(response)
                 print()
         except Exception as e:
-            print('Error in indexing data')
+            print('[ElasticsearchUtils.create_index] Error in indexing data ' + str(e))
 
 
     def store_information_to_elasticsearch(self, index_name, info):

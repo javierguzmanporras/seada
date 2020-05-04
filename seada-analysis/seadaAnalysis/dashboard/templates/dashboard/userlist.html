@@ -1,0 +1,40 @@
+{% extends 'base_2col.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block main-content %}
+    <h1>User List</h1>
+
+    <form action="{% url 'compare_users' %}" method="post">
+        {% csrf_token %}
+        <table class="table table-striped">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Select</th>
+              <th scope="col">Name</th>
+              <th scope="col">Screen_name</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for name, screen_name in user_list %}
+                <tr>
+                  <th scope="row">{{forloop.counter}}</th>
+                    <td>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="usercheck" value="{{screen_name}}" id="usercheck-{{forloop.counter}}">
+                        </div>
+                    </td>
+                  <td>{{name}}</td>
+                  <td>{{screen_name}}</td>
+                </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <input type="submit"  value="Compare two users">
+    </form>
+
+{% endblock %}
+
+<!--class="btn btn-outline-primary"-->

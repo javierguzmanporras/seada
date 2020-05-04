@@ -45,7 +45,8 @@ class Tweet:
         """
         self.raw_tweet = SeadaUtils.json_to_string(item)
         self.created_at = item.created_at
-        self.tweet['created_at'] = str(item.created_at)
+        #self.tweet['created_at'] = str(item.created_at)
+        self.tweet['created_at'] = item.created_at
         self.id = item.id
         self.tweet['id'] = item.id
         self.truncated = item.truncated
