@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
-
 import SeadaUtils
 
 
@@ -87,19 +85,6 @@ class TwitterUser:
             self.user['profile_banner_url'] = user.profile_banner_url
         except AttributeError:
             self.user['profile_banner_url'] = ""
-        td = datetime.today() - self.created_at
-        # print("[user] td: %s" % str(td))
-        # print("[user] td: {datatime}".format(datatime=td))
-
-        if td.days > 0:
-            self.tweets_average = round(float(self.statuses_count / (td.days * 1.0)), 3)
-            self.likes_average = round(float(self.favourites_count / (td.days * 1.0)), 3)
-        else:
-            self.tweets_average = self.statuses_count
-            self.likes_average = self.favourites_count
-
-        # print("[user] tweets average: %s" % str(self.tweets_average))
-        # print("[user] likes average: %s" % str(self.likes_average))
 
     def get_csv_output(self, file_name, dataset_directory):
         """
@@ -115,7 +100,9 @@ class TwitterUser:
         Generate a json file from user information. If the file exists, append new item.
         :return: a new json file, or a new item
         """
-        SeadaUtils.SeadaUtils.get_json_output(file_name, dataset_directory, self.user)
+        item = dict(self.user)
+        item['created_at'] = str(item['created_at'])
+        SeadaUtils.SeadaUtils.get_json_output(file_name=file_name, dataset_directory=dataset_directory, item=item)
 
     def get_tuple_output(self):
         """
