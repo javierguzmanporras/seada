@@ -6,15 +6,19 @@
 # python3 seada-ingest.py --account kinomakino
 
 import argparse
+import datetime
 import logging
 import os
 import sys
 
-from Database import *
-from TweetMiner import *
-from TweetStreaming import *
-from ElasticsearchUtils import *
-from TwitterUser import *
+from seada import Seada
+from timer import Timer
+
+from databaseHandler import *
+from tweetMiner import *
+from tweetStreaming import *
+from elasticsearchHandler import *
+from twitterUser import *
 from Favorites import *
 
 __version__ = 0.1
@@ -59,11 +63,13 @@ def parse_args():
     parser.add_argument('-n', '--tweets_number', default=100, type=int,
                         help='Number of tweets that will get from user. Default=100.')
 
-    parser.add_argument('-o', '--output', choices=['csv', 'json', 'database', 'all'], default='json',
-                        help='Types of output between json, csv or database. Default=json.')
+    parser.add_argument('-o', '--output', choices=['csv', 'json', 'database', 'all'], default='None',
+                        help='Types of output between json, csv or database. Default=None.')
 
     parser.add_argument('-of', '--output_folder', default='dataset',
                         help='Save the dataset output into specific folder. Default=dataset')
+
+    parser.add_argument('-d', '--debug', action='store_true', help='Activate debug for see more print outputs')
 
     parser.add_argument('-v', '--version', action='version', version=f"%(prog)s {__version__}")
     args = parser.parse_args()
@@ -208,11 +214,13 @@ def main():
     config_logging()
     banner()
 
-    print(vars(args))
-    print()
+    if args.debug:
+        print('[+] ' + str(vars(args)) + '\n')
+        logging.info('[main] {}'.format(vars(args)))
 
     dataset_directory = database_directory = args.output_folder
-    database_name = 'seada_database.db'
+    dataset_suffix = datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+    database_name = 'dataset_database_{}.db'.format(dataset_suffix)
     database_path = database_directory + '/' + database_name
 
     config_dataset_output(dataset_directory)
@@ -229,10 +237,34 @@ def main():
     # fav.get_user_favorites(api,"")
     # sys.exit(0)
 
+    seada = Seada(api=api,
+                  args=args,
+                  db=db,
+                  db_connection=db_connection,
+                  dataset_directory=dataset_directory,
+                  es_connect=es)
+
     if args.account:
-        get_user_information(api, args, args.account, db, db_connection, dataset_directory, es_connect=es)
-        get_tweets_information(api, args, args.account, db, db_connection, dataset_directory, args.tweets_number,
-                               es_connect=es)
+        seada.get_user_information(username=args.account)
+        seada.get_user_output(file_name='dataset_users_{}'.format(dataset_suffix))
+        seada.get_tweets_information(username=args.account, ntweets=args.tweets_number)
+        seada.get_tweets_output(file_name='dataset_tweets_{}'.format(dataset_suffix))
+        #seada.get_friends_information(username=args.account)
+        seada.get_followers_information(username=args.account)
+
+
+        print('[+] Download and storage {user} information in {time} seconds.'.format(user=args.account,
+                                                                                      time=Timer.timers['user_info']))
+
+        print('[+] Download and storage {tweets} tweets of {user} in {time} seconds'.format(
+            tweets=args.tweets_number,
+            user=args.account,
+            time=Timer.timers['tweets_info']))
+
+        print('[+] Download {user} friend list in {time} secods'.format(user=args.account,
+                                                                        time=Timer.timers['friends_info']))
+
+        print('[+] Download {} follower list in {} seconds'.format(args.account, Timer.timers['followers_info']))
 
     if args.account_list:
         for account in args.account_list:
@@ -243,7 +275,10 @@ def main():
     if args.streaming:
         get_streaming(api, args, db, db_connection, dataset_directory, es_connect=es)
 
+
+
     sys.exit(0)
+
 
 if __name__ == '__main__':
     main()
