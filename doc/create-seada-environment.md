@@ -5,6 +5,11 @@
 git clone https://github.com/javierguzmanporras/project-seada
 cd project-seada
 pip3 install -r requirements.txt
+python3 -m textblob.download_corpora
+```
+
+We need add twitter development keys to environmnet variables
+```
 export CONSUMER_KEY=XXXXXXXXXXXXXXXXXXXXXXXXX
 export CONSUMER_SECRET=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 export ACCESS_TOKEN=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
