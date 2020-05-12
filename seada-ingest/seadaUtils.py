@@ -3,6 +3,7 @@ import json
 
 
 class SeadaUtils:
+    """Common json and csv utilities"""
 
     @classmethod
     def json_to_string(cls, json_information):
