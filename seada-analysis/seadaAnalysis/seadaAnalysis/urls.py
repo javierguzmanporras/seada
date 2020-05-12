@@ -18,5 +18,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('dashboard/', include('dashboard.urls')),
+    path('twitter/', include('twitter.urls')),
     path('admin/', admin.site.urls),
 ]
