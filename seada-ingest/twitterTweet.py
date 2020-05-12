@@ -28,7 +28,6 @@ class Tweet:
         self.lang = ""
         self.user_id = ""
         self.user_name = ""
-        self.user = ""
         self.user_screen_name = ""
         self.entities_hashtags = []
         self.entities_user_mentions = []
@@ -36,6 +35,7 @@ class Tweet:
         # Other information
         self.tweet = {}
         self.raw_tweet = ""
+        self.user = ""
 
     def set_tweet_information(self, item):
         """
@@ -45,7 +45,6 @@ class Tweet:
         """
         self.raw_tweet = SeadaUtils.json_to_string(item)
         self.created_at = item.created_at
-        #self.tweet['created_at'] = str(item.created_at)
         self.tweet['created_at'] = item.created_at
         self.id = item.id
         self.tweet['id'] = item.id
@@ -122,25 +121,26 @@ class Tweet:
         :param dataset_directory: where the file will create.
         :return: a json file in dataset_directory.
         """
-        SeadaUtils.get_json_output(file_name, dataset_directory, self.tweet)
+        item = dict(self.tweet)
+        item['created_at'] = str(item['created_at'])
+        SeadaUtils.get_json_output(file_name=file_name, dataset_directory=dataset_directory, item=item)
 
-    def get_csv_output(self, file_name, dataset_directoy):
+    def get_csv_output(self, file_name, dataset_directory):
         """
         Generate a csv output file for this instance.
         :param file_name: the name of the csv file.
         :param dataset_directoy: where the file will create
         :return: a csv file in dataset_directory.
         """
-        item = list(self.get_tuple_output())
-        item.pop(-1)
-        SeadaUtils.get_csv_output(file_name, dataset_directoy, item)
+        item = list(self.get_tuple_output_without_raw())
+        #item.pop(-1)
+        SeadaUtils.get_csv_output(file_name=file_name, dataset_directory=dataset_directory, item=item)
 
     def get_tuple_output_without_raw(self):
         """
         Generate a tuple with tweet information without raw information for input database
         :return: A tuple with tweet information
         """
-
         # You could pickle/marshal/json your array and store it as binary/varchar/json field in your database.
         hashtags_json = json.dumps(self.entities_hashtags)
         user_mentions_json = json.dumps(self.entities_user_mentions)
@@ -150,7 +150,8 @@ class Tweet:
                        self.in_reply_to_status_id_str, self.in_reply_to_user_id_str, self.in_reply_to_screen_name,
                        self.coordinates, self.place, self.contributors,
                        self.is_quote_status, self.retweet_count, self.favorite_count, self.favorited, self.retweeted,
-                       self.possibly_sensitive, self.lang, hashtags_json, user_mentions_json, urls_json)
+                       self.possibly_sensitive, self.lang, self.user_id, self.user_name, self.user_screen_name,
+                       hashtags_json, user_mentions_json, urls_json)
         return tuple_tweet
 
     def get_tuple_output(self):
@@ -162,5 +163,6 @@ class Tweet:
                        self.in_reply_to_status_id_str, self.in_reply_to_user_id_str, self.in_reply_to_screen_name,
                        self.coordinates, self.place, self.contributors,
                        self.is_quote_status, self.retweet_count, self.favorite_count, self.favorited, self.retweeted,
-                       self.possibly_sensitive, self.lang, self.raw_tweet)
+                       self.possibly_sensitive, self.lang, self.user_id, self.user_name, self.user_screen_name,
+                       self.raw_tweet)
         return tuple_tweet
