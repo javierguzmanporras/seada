@@ -12,7 +12,7 @@ import yaml
 from Alert import *
 from Sender import *
 from elasticsearch import Elasticsearch
-from ElasticsearchUtils import *
+from ElasticsearchUtils__old import *
 from time import sleep
 
 __version__ = 0.1
