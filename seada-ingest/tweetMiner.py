@@ -4,7 +4,7 @@
 import tweepy
 from tqdm import tqdm
 
-from Tweet import *
+from twitterTweet import *
 
 
 class TweetMiner:
