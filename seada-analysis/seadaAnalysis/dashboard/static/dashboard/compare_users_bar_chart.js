@@ -5,18 +5,12 @@ $(function () {
         url: $myChart.data("url"),
         success: function (data) {
 
-            console.log(data)
-
             var barChartData = {
-                //labels: ['I1', 'I2', 'I3', 'I4', 'I5', 'I6'],
                 labels: data.labels,
                 datasets: [
                     {
                         label: data.user1_label,
                         data: data.user1_data,
-                        //data: [12, 10, 3, 5, 2, 3],
-                        //data: [{x:'2016-12-25', y:20}, {x:'2016-12-26', y:10}, {x:'2016-12-27', y:5}, {x:'2016-12-28', y:1}],
-                        //data: [[5,6], [-3,-6]],
                         backgroundColor: 'rgba(255, 99, 132, 0.2)',
                         borderColor: 'rgba(255, 99, 132, 1)',
                         borderWidth: 1,
@@ -24,9 +18,6 @@ $(function () {
                     {
                         label: data.user2_label,
                         data: data.user2_data,
-                        //data: [12, 10, 3, 5, 2, 3],
-                        //data: [{x:'2016-12-25', y:20}, {x:'2016-12-26', y:10}, {x:'2016-12-27', y:5}, {x:'2016-12-28', y:1}],
-                        //data: [[5,6], [-3,-6]],
                         backgroundColor: 'rgba(54, 162, 235, 0.2)',
                         borderColor: 'rgba(54, 162, 235, 1)',
                         borderWidth: 1
@@ -68,12 +59,20 @@ $(function () {
 
             document.getElementById('addData').addEventListener('click', function() {
                 if (barChartData.datasets.length > 0) {
-                    barChartData.labels.push('I7');
-                    for (var index = 0; index < barChartData.datasets.length; ++index) {
-                        barChartData.datasets[index].data.push(7);
-                    }
-
-                    window.myBar.update();
+                    $.ajax({
+                        type: 'GET',
+                        url: "http://localhost:8000/dashboard/compareusers/barchart/" + data.user1_label + "/" + data.user2_label + "/" + barChartData.labels[0],
+                        complete: function() {},
+                        success: function (data) {
+                            barChartData.labels.unshift(data.label);
+                            barChartData.datasets[0].data.unshift(data.user1_data);
+                            barChartData.datasets[1].data.unshift(data.user2_data);
+                            window.myBar.update();
+                        }
+                    })
+//                    for (var index = 0; index < barChartData.datasets.length; ++index) {
+//                        barChartData.datasets[index].data.unshift();
+//                    }
                 }
             });
 
