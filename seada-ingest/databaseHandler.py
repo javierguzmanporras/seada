@@ -25,7 +25,7 @@ class Database:
 
     def create_table(self, connection):
         """
-        Create a user table
+        Create a user or tweet table
         :param connection:
         :return:
         """
@@ -41,8 +41,8 @@ class Database:
                           "source text, in_reply_to_status_id_str text, in_reply_to_user_id_str text," \
                           "in_reply_to_screen_name text, coordinates text, place text, contributors text, " \
                           "is_quote_status text, retweet_count text, favorite_count text, favorited text, " \
-                          "retweetd text, possibly_sensitive text, lang text, hashtags text, user_mentions text, " \
-                          "urls text)"
+                          "retweetd text, possibly_sensitive text, lang text, user_id text, user_name text, " \
+                          "user_screen_name text, hashtags text, user_mentions text, urls text)"
 
         # self.tuit = {}
         # self.entities_hashtags = []
@@ -93,8 +93,9 @@ class Database:
 
         sql_query = '''INSERT INTO tweet(id, created_at, text, truncated, source, in_reply_to_status_id_str,
                  in_reply_to_user_id_str, in_reply_to_screen_name, coordinates, place, contributors, is_quote_status, 
-                 retweet_count, favorite_count, favorited, retweetd, possibly_sensitive, lang, hashtags, user_mentions,
-                 urls) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'''
+                 retweet_count, favorite_count, favorited, retweetd, possibly_sensitive, lang, user_id, user_name, 
+                 user_screen_name, hashtags, user_mentions,
+                 urls) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'''
 
         cursor = connection.cursor()
         try:
