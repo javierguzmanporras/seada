@@ -1,0 +1,63 @@
+{% extends 'base_2col.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block main-content %}
+
+    <h1>User List</h1>
+    <div class="table-responsive">
+        <table class="table table-striped table-sm" style="font-size:12px">
+          <thead class="thead-dark">
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Select</th>
+                <th scope="col">Nick name</th>
+                <th scope="col">Location</th>
+                <th scope="col">Description</th>
+                <th scope="col">URL</th>
+                <th scope="col">Followers Count</th>
+                <th scope="col">Protected</th>
+                <th scope="col">Friends Count</th>
+                <th scope="col">Listed Count</th>
+                <th scope="col">Favourites Count</th>
+                <th scope="col">Created at</th>
+                <th scope="col">Geo Enabled</th>
+                <th scope="col">Verified</th>
+                <th scope="col">Statuses Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for id, name, screen_name, location, description, url, follower_count, protected, friends_count, listed_count, favourites_count, created_at, geo_enabled, verified, statuses_count in user_list %}
+                <tr>
+                    <th scope="row">{{forloop.counter}}</th>
+                    <td>{{id}}</td>
+                    <td>{{name}}</td>
+                    <td><a href='/dashboard/user/{{id}}' class="btn btn-outline-primary btn-sm" role="button" style="font-size:12px">{{screen_name}} Dashboard</a></td>
+                    <td><a href='https://twitter.com/{{screen_name}}'>{{screen_name}}</a></td>
+                    <td>{{location}}</td>
+                    <td>{{description}}</td>
+                    <td> <a href={{url}}>{{url}}</a></td>
+                    <td>{{follower_count}}</td>
+                    <td>{{protected}}</td>
+                    <td>{{friends_count}}</td>
+                    <td>{{listed_count}}</td>
+                    <td>{{favourites_count}}</td>
+                    <td>{{created_at}}</td>
+                    <td>{{geo_enabled}}</td>
+                    <td>{{verified}}</td>
+                    <td>{{statuses_count}}</td>
+                </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    </div>
+
+
+
+
+
+
+{% endblock %}
