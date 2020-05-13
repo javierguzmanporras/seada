@@ -1,0 +1,111 @@
+{% extends 'base_2col.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block main-content %}
+    <h1 class="display-4">User {{data.name}} Dashboard</h1>
+    <br>
+    <h1>User information</h1>
+    <hr>
+<!--    <div class="media">-->
+<!--        <img src={{data.profile_image_url_https}} class="mr-4" alt="Responsive image">-->
+<!--        <div class="media-body">-->
+<!--            <h5 class="mt-0">{{data.name}}</h5>-->
+<!--            <strong>Nick: </strong> {{data.screen_name}}<br>-->
+<!--            <strong>Description: </strong> {{data.descripcion}}<br>-->
+<!--            <strong>Creaded at: </strong> {{data.created_at}}<br>-->
+<!--            <strong>Location: </strong> {{data.location}}<br>-->
+<!--            <strong>Verified: </strong> {{data.verified}}<br>-->
+<!--            <strong>Tweets Count: </strong>{{data.statuses_count}}<br>-->
+<!--            <strong>Followers Count: </strong>{{data.followers_count}}<br>-->
+<!--            <strong>Friends Count: </strong>{{data.friends_count}}<br>-->
+<!--            <strong>Favourites Count: </strong>{{data.favourites_count}}<br>-->
+<!--        </div>-->
+<!--    </div>-->
+
+
+    <div class="row">
+         <div class="col-sm-6">
+            <div class="card border-dark mb-3" style="max-width: 540px;">
+                <div class="row no-gutters">
+                    <div class="col-md-4">
+                        <img src={{data.profile_image_url_https}} class="img-fluid" alt="Responsive image">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                             <h5 class="card-title">{{data.name}}</h5>
+                            <strong>Nick: </strong> {{data.screen_name}}<br>
+                            <strong>Description: </strong> {{data.descripcion}}<br>
+                            <strong>Creaded at: </strong> {{data.created_at}}<br>
+                            <strong>Location: </strong> {{data.location}}<br>
+                            <strong>Verified: </strong> {{data.verified}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+         </div>
+         <div class="col-sm-6">
+            <div class="card border-dark mb-3" style="max-width: 540px;">
+               <div class="card-body">
+                   <strong>Tweets Count: </strong>{{data.statuses_count}}<br>
+                   <strong>Followers Count: </strong>{{data.followers_count}}<br>
+                   <strong>Friends Count: </strong>{{data.friends_count}}<br>
+                   <strong>Favourites Count: </strong>{{data.favourites_count}}<br>
+                   <strong>Tweets average: </strong>{{data.tweets_average}} by day<br>
+                   <strong>Likes average: </strong>{{data.likes_average}} by day
+               </div>
+            </div>
+         </div>
+    </div>
+    <br>
+    <br>
+    <h1>Analyzed information</h1>
+    <hr>
+
+    <div class="container-fluid">
+        <div class="row">
+<!--            <div class="col-xl-3 col-md-6 mb-4">-->
+            <div class="col-xl-6">
+                <div class="card shadow">
+                    <!-- card header -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Time Analysis</h6>
+                    </div>
+                    <!-- end card header -->
+                    <div class="card-body">
+                        <div class="chart-area">
+                            <!-- bar chart -->
+                            <div id="hour_chart_container" style="width: 50%;"></div>
+                                <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.js" integrity="sha256-nZaxPHA2uAaquixjSDX19TmIlbRNCOrf5HO1oHl5p70=" crossorigin="anonymous"></script>
+                                <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.js" integrity="sha256-8zyeSXm+yTvzUN1VgAOinFgaVFEFTyYzWShOy9w7WoQ=" crossorigin="anonymous"></script>
+                                <canvas id="user_hour_analysis_chart" data-url="{% url 'user_hour_analysis' userid %}"></canvas>
+                                <script src="{% static 'dashboard/js/user_hour_analysis_chart.js' %}"></script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="card shadow">
+                    <!-- card header -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Sentiment analysis</h6>
+                    </div>
+                    <!-- end card header -->
+                    <div class="card-body">
+                        <div class="chart-area">
+                            <!-- bar chart -->
+                            <div id="sentiment_chart_container" style="width: 50%;"></div>
+                                <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.js" integrity="sha256-nZaxPHA2uAaquixjSDX19TmIlbRNCOrf5HO1oHl5p70=" crossorigin="anonymous"></script>
+                                <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.js" integrity="sha256-8zyeSXm+yTvzUN1VgAOinFgaVFEFTyYzWShOy9w7WoQ=" crossorigin="anonymous"></script>
+                                <canvas id="user_sentiment_analysis_chart" data-url="{% url 'user_sentiment_analysis' userid %}"></canvas>
+                                <script src="{% static 'dashboard/js/user_sentiment_analysis_chart.js' %}"></script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
