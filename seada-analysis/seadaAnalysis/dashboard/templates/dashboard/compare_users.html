@@ -79,6 +79,7 @@
                         <!-- bar chart -->
                         <div id="network_container" style="width: 100%;"></div>
                             <link rel="stylesheet" type="text/css" href="{% static 'dashboard/CSS/network.css' %}">
+                            <canvas id="networkchart" data-url="{% url 'network_data' user1 user2 %}"></canvas>
                             <script src="https://d3js.org/d3.v4.min.js"></script>
                             <script src="https://d3js.org/d3-selection-multi.v1.js"></script>
                             <script src="{% static 'dashboard/network.js' %}"></script>
