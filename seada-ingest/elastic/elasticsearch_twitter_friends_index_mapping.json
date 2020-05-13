@@ -1,0 +1,15 @@
+{
+  "settings": {
+    "number_of_shards": "1",
+    "number_of_replicas":"2"
+  },
+  "mappings": {
+    "properties": {
+      "@timestamp": { "type":  "date" },
+      "id": { "type": "long" },
+      "name": { "type":  "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "screen_name": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "friend_list": { "type": "text", "fields": {"keyword": {"type": "keyword"}}}
+    }
+  }
+}
