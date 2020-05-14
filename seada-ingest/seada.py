@@ -5,6 +5,7 @@ from twitterUser import TwitterUser
 from twitterFriend import TwitterFriends
 from twitterFollower import TwitterFollowers
 from tweetMiner import TweetMiner
+from twitterFavorites import TwitterFavorites
 from timer import Timer
 
 import tweepy
@@ -17,6 +18,7 @@ class Seada:
     timer_tweets_info = Timer(name='tweets_info')
     timer_friends_info = Timer(name='friends_info')
     timer_followers_info = Timer(name='followers_info')
+    timer_favorites_info = Timer(name='favorites_info')
 
     def __init__(self, api, args, db, db_connection, dataset_directory, es_connect):
         self.api = api
@@ -117,9 +119,7 @@ class Seada:
         }
 
         self.es_connect.store_information_to_elasticsearch(index_name=self.es_connect.twitter_friend_index_name,
-                                                           info=data,
-                                                           debug=self.args.debug)
-
+                                                           info=data, debug=self.args.debug)
         self.timer_friends_info.stop()
 
     def get_friends_output(self):
@@ -129,8 +129,58 @@ class Seada:
         self.timer_followers_info.start()
         tfollower = TwitterFollowers(username=username, api=self.api)
         tfollower.get_user_followers()
-        tfollower.get_output()
+        # tfollower.get_output()
+
+        self.es_connect.create_index(index_name=self.es_connect.twitter_follower_index_name,
+                                     mapping_file=self.es_connect.twitter_follower_mapping_file, debug=self.args.debug)
+
+        data = {
+            'id': self.user.id,
+            'name': self.user.name,
+            'screen_name': self.user.screen_name,
+            'follower_list': tfollower.followers_id_list
+        }
+
+        self.es_connect.store_information_to_elasticsearch(index_name=self.es_connect.twitter_follower_index_name,
+                                                           info=data, debug=self.args.debug)
         self.timer_followers_info.stop()
 
     def get_followers_output(self):
+        pass
+
+    def get_favorites_information(self, username):
+        self.timer_favorites_info.start()
+        tf = TwitterFavorites(username=username, api=self.api)
+        tf.get_user_favorites()
+        user = self.api.get_user(username)
+
+        self.es_connect.create_index(index_name=self.es_connect.twitter_favorite_index_name,
+                                     mapping_file=self.es_connect.twitter_favorite_mapping_file,
+                                     debug=self.args.debug)
+
+        for favorite in tf.favorites_list:
+            data = {
+                '@user_id': user.id,
+                'user_name': user.name,
+                'user_screen_name': user.screen_name,
+                'created_at': favorite.created_at,
+                'id': favorite.id,
+                'text': favorite.text,
+                'source': favorite.source,
+                'coordinates': favorite.coordinates,
+                'place': favorite.place,
+                'retweet_count': favorite.retweet_count,
+                'favorite_count': favorite.favorite_count,
+                'lang': favorite.lang,
+                'hashtags': favorite.entities_hashtags,
+                'user_mentions': favorite.entities_user_mentions,
+                'urls': favorite.entities_urls
+            }
+
+            self.es_connect.store_information_to_elasticsearch(index_name=self.es_connect.twitter_favorite_index_name,
+                                                               info=data, debug=self.args.debug)
+
+        self.timer_favorites_info.stop()
+
+    def get_favorites_output(self):
         pass
