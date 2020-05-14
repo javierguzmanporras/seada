@@ -1,0 +1,26 @@
+{
+  "settings": {
+    "number_of_shards": "1",
+    "number_of_replicas":"2"
+  },
+  "mappings": {
+    "properties": {
+      "@timestamp": { "type":  "date" },
+      "user_id": { "type": "long" },
+      "user_name": { "type":  "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "user_screen_name": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "created_at": {"type": "date"},
+      "id": { "type": "long" },
+      "text": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "source": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "coordinates": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "place": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "retweet_count": { "type": "long" },
+      "favorite_count": { "type": "long" },
+      "lang": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "hashtags": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "user_mentions": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "urls": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}}
+    }
+  }
+}
