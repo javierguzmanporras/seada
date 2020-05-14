@@ -16,6 +16,10 @@ class ElasticSearchUtils:
     twitter_tweet_mapping_file = "elasticsearch_twitter_tweets_index_mapping.json"
     twitter_friend_index_name = "twitter_friends"
     twitter_friend_mapping_file = "elasticsearch_twitter_friends_index_mapping.json"
+    twitter_follower_index_name = "twitter_follower"
+    twitter_follower_mapping_file = "elasticsearch_twitter_follower_index_mapping.json"
+    twitter_favorite_index_name = "twitter_favorite"
+    twitter_favorite_mapping_file = "elasticsearch_twitter_favorite_index_mapping.json"
 
     def __init__(self, es_host, es_port):
         self.es_host = es_host
