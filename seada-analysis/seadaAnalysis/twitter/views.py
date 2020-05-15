@@ -1,7 +1,6 @@
 from django.shortcuts import render
 
-from elasticsearch import Elasticsearch
-from ElasticsearchUtils__old import *
+from elasticsearchHandler import ElasticSearchUtils
 
 
 def config_elasticsearch(es_host, es_port):
@@ -26,7 +25,7 @@ def search(es, index, query):
 def index(request):
     template = 'twitter/index.html'
     context = {
-        'title': 'SEADA Twitter',
+        'title': 'SEADA Analysis',
     }
     return render(request, template, context)
 
@@ -95,7 +94,7 @@ def userlist(request):
     return render(request, template, context)
 
 
-def user(request):
+def user(request, user_id):
     template = 'twitter/user.html'
     context = {
         'title': 'SEADA Twitter User',
