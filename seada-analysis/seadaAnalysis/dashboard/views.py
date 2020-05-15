@@ -1,9 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-
-from elasticsearch import Elasticsearch
-
-from ElasticsearchUtils__old import *
+from elasticsearchHandler import ElasticSearchUtils
 from datetime import datetime, timedelta
 from textblob import TextBlob
 
@@ -193,6 +190,7 @@ def search(es, index, query):
         response = es.es_connection.search(index=index, body=query)
     except:
         print("Error with query!!")
+        print(response)
     return response
 
 
