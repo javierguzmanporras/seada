@@ -19,7 +19,7 @@ from tweetMiner import *
 from tweetStreaming import *
 from elasticsearchHandler import *
 from twitterUser import *
-from Favorites import *
+from twitterFavorites import *
 
 __version__ = 0.1
 
@@ -232,11 +232,6 @@ def main():
     es = config_elasticsearch('localhost', '9200')
     api = config_twitter_api()
 
-    # # Test
-    # fav = Favorites()
-    # fav.get_user_favorites(api,"")
-    # sys.exit(0)
-
     seada = Seada(api=api,
                   args=args,
                   db=db,
@@ -249,9 +244,9 @@ def main():
         seada.get_user_output(file_name='dataset_users_{}'.format(dataset_suffix))
         seada.get_tweets_information(username=args.account, ntweets=args.tweets_number)
         seada.get_tweets_output(file_name='dataset_tweets_{}'.format(dataset_suffix))
-        #seada.get_friends_information(username=args.account)
+        seada.get_friends_information(username=args.account)
         seada.get_followers_information(username=args.account)
-
+        seada.get_favorites_information(username=args.account)
 
         print('[+] Download and storage {user} information in {time} seconds.'.format(user=args.account,
                                                                                       time=Timer.timers['user_info']))
@@ -265,6 +260,7 @@ def main():
                                                                         time=Timer.timers['friends_info']))
 
         print('[+] Download {} follower list in {} seconds'.format(args.account, Timer.timers['followers_info']))
+        print('[+] Download {} favorites in {} seconds'.format(args.account, Timer.timers['favorites_info']))
 
     if args.account_list:
         for account in args.account_list:
@@ -274,8 +270,6 @@ def main():
 
     if args.streaming:
         get_streaming(api, args, db, db_connection, dataset_directory, es_connect=es)
-
-
 
     sys.exit(0)
 
