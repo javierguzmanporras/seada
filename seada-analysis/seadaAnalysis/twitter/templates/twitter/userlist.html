@@ -33,7 +33,7 @@
             {% for id, name, screen_name, location, description, url, follower_count, protected, friends_count, listed_count, favourites_count, created_at, geo_enabled, verified, statuses_count in user_list %}
                 <tr>
                     <th scope="row">{{forloop.counter}}</th>
-                    <td>{{id}}</td>
+                    <td><a href='/twitter/user/{{id}}'>{{id}}</a></td>
                     <td>{{name}}</td>
                     <td><a href='/dashboard/user/{{id}}' class="btn btn-outline-primary btn-sm" role="button" style="font-size:12px">{{screen_name}} Dashboard</a></td>
                     <td><a href='https://twitter.com/{{screen_name}}'>{{screen_name}}</a></td>
