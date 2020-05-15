@@ -2,13 +2,15 @@
 
 <div class="sidebar-sticky">
     <ul class="nav flex-column">
-        SEADA Analysis Web Application
+        Analysis Web Application
+        <li class="nav-item"><hr></li>
         <li class="nav-item">
-            <a class="nav-link active" href="{% url 'twitter:index' %}">
+            <a class="nav-link active" href="{% url 'index' %}">
                 <img src="{% static 'svg/home.svg' %}" alt="" width="16" height="16" title="home">
-                SEADA Twitter Home
+                SEADA Home
             </a>
         </li>
+        <li class="nav-item"><hr></li>
         <li class="nav-item">
             <a class="nav-link active" href="/dashboard/">
                 <img src="{% static 'svg/dashboard.svg' %}" alt="" width="16" height="16" title="dashboard">
@@ -21,10 +23,17 @@
                 Compare Users
             </a>
         </li>
+        <li class="nav-item"><hr></li>
+        <li class="nav-item">
+            <a class="nav-link active" href="{% url 'twitter:twitter' %}">
+                <img src="{% static 'svg/people.svg' %}" alt="" width="16" height="16" title="people">
+                SEADA Twitter app home
+            </a>
+        </li>
         <li class="nav-item">
             <a class="nav-link active" href="{% url 'twitter:userlist' %}">
                 <img src="{% static 'svg/people.svg' %}" alt="" width="16" height="16" title="people">
-                User List
+                Twitter User List
             </a>
         </li>
     </ul>
