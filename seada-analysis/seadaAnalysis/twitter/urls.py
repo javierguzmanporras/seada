@@ -4,8 +4,8 @@ from . import views
 
 app_name = 'twitter'
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', views.index, name='twitter'),
     path('adduser/', views.add_user, name='adduser'),
     path('userlist/', views.userlist, name='userlist'),
-    # path('user/<str:user>', views.user, name='user')
+    path('user/<str:user_id>', views.user, name='user'),
 ]
