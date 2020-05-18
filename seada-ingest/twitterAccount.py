@@ -12,7 +12,7 @@ import tweepy
 import logging
 
 
-class Seada:
+class TwitterAccount:
 
     timer_user_info = Timer(name='user_info')
     timer_tweets_info = Timer(name='tweets_info')
