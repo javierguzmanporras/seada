@@ -3,7 +3,7 @@
 # DEASOS - Data Extraction and Analysis System from Open Sources
 
 #examples
-# python3 seada-ingest.py --account kinomakino
+# python3 seadaIngest.py --account kinomakino
 
 import argparse
 import datetime
@@ -46,7 +46,7 @@ def parse_args():
     Method for get the arguments input of seada-ingest program.
     :return: A Namespace class of argparse.
     """
-    parser = argparse.ArgumentParser(prog='seada-ingest.py',
+    parser = argparse.ArgumentParser(prog='seadaIngest.py',
                                      description='Sistema de Extracción y Análisis de Datos de fuentes Abiertas',
                                      epilog='Enjoy! :)')
 
