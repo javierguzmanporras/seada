@@ -245,8 +245,9 @@ def main():
         seada.get_tweets_information(username=args.account, ntweets=args.tweets_number)
         seada.get_tweets_output(file_name='dataset_tweets_{}'.format(dataset_suffix))
         seada.get_friends_information(username=args.account)
-        seada.get_followers_information(username=args.account)
-        seada.get_favorites_information(username=args.account)
+        seada.get_friends_output(file_name='dataset_friends_{}'.format(dataset_suffix))
+        #seada.get_followers_information(username=args.account)
+        #seada.get_favorites_information(username=args.account)
 
         print('[+] Download and storage {user} information in {time} seconds.'.format(user=args.account,
                                                                                       time=Timer.timers['user_info']))
@@ -275,4 +276,11 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except (KeyboardInterrupt, SystemExit) as e:
+        sys.stdout.flush()
+        exit(1)
+    except Exception as e:
+        print(str(e))
+        exit(1)
