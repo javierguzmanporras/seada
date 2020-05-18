@@ -30,6 +30,7 @@ class Seada:
 
         self.user = TwitterUser(self.dataset_directory)
         self.tm = TweetMiner()
+        self.tf = TwitterFriends(api=self.api)
 
     def get_user_information(self, username):
         try:
@@ -105,8 +106,7 @@ class Seada:
 
     def get_friends_information(self, username):
         self.timer_friends_info.start()
-        tf = TwitterFriends(username=username, api=self.api)
-        tf.get_user_friends()
+        self.tf.get_user_friends(username=username)
         self.es_connect.create_index(index_name=self.es_connect.twitter_friend_index_name,
                                      mapping_file=self.es_connect.twitter_friend_mapping_file,
                                      debug=self.args.debug)
@@ -115,15 +115,19 @@ class Seada:
             "id": self.user.id,
             "name": self.user.name,
             "screen_name": self.user.screen_name,
-            "friend_list": tf.friends_id_list
+            "friend_list": self.tf.friends_id_list
         }
 
         self.es_connect.store_information_to_elasticsearch(index_name=self.es_connect.twitter_friend_index_name,
                                                            info=data, debug=self.args.debug)
         self.timer_friends_info.stop()
 
-    def get_friends_output(self):
-        pass
+    def get_friends_output(self, file_name):
+        if self.args.output == 'json' or self.args.output == 'all':
+            file_name = file_name + '.json'
+            self.tf.get_json_output(file_name=file_name, dataset_directory=self.dataset_directory)
+            print('[+] {} output file created'.format(file_name))
+            logging.info('[seada.get_friends_output] JSON output file created')
 
     def get_followers_information(self, username):
         self.timer_followers_info.start()
