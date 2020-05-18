@@ -11,9 +11,8 @@ import logging
 import os
 import sys
 
-from seada import Seada
+from twitterAccount import TwitterAccount
 from timer import Timer
-
 from databaseHandler import *
 from tweetMiner import *
 from tweetStreaming import *
@@ -232,22 +231,22 @@ def main():
     es = config_elasticsearch('localhost', '9200')
     api = config_twitter_api()
 
-    seada = Seada(api=api,
-                  args=args,
-                  db=db,
-                  db_connection=db_connection,
-                  dataset_directory=dataset_directory,
-                  es_connect=es)
+    twitter_account = TwitterAccount(api=api,
+                           args=args,
+                           db=db,
+                           db_connection=db_connection,
+                           dataset_directory=dataset_directory,
+                           es_connect=es)
 
     if args.account:
-        seada.get_user_information(username=args.account)
-        seada.get_user_output(file_name='dataset_users_{}'.format(dataset_suffix))
-        seada.get_tweets_information(username=args.account, ntweets=args.tweets_number)
-        seada.get_tweets_output(file_name='dataset_tweets_{}'.format(dataset_suffix))
-        seada.get_friends_information(username=args.account)
-        seada.get_friends_output(file_name='dataset_friends_{}'.format(dataset_suffix))
-        #seada.get_followers_information(username=args.account)
-        #seada.get_favorites_information(username=args.account)
+        twitter_account.get_user_information(username=args.account)
+        twitter_account.get_user_output(file_name='dataset_users_{}'.format(dataset_suffix))
+        twitter_account.get_tweets_information(username=args.account, ntweets=args.tweets_number)
+        twitter_account.get_tweets_output(file_name='dataset_tweets_{}'.format(dataset_suffix))
+        twitter_account.get_friends_information(username=args.account)
+        twitter_account.get_friends_output(file_name='dataset_friends_{}'.format(dataset_suffix))
+        twitter_account.get_followers_information(username=args.account)
+        twitter_account.get_favorites_information(username=args.account)
 
         print('[+] Download and storage {user} information in {time} seconds.'.format(user=args.account,
                                                                                       time=Timer.timers['user_info']))
