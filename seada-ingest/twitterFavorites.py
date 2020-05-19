@@ -22,7 +22,7 @@ class TwitterFavorites:
         user = self.api.get_user(self.username)
         total = user.favourites_count
 
-        print('[+] User {} has {} favorites'.format(self.username, total))
+        print('[+] Retrieving {total} favorites from {username}'.format(total=total, username=self.username))
 
         try:
             for favorite in tqdm(tweepy.Cursor(self.api.favorites, screen_name=self.username).items(total),
@@ -31,8 +31,8 @@ class TwitterFavorites:
                 tweet = Tweet()
                 tweet.set_tweet_information(favorite)
                 self.favorites_list.append(tweet)
-        except:
-            print("[+] Error" + str(sys.exc_info()))
+        except Exception as exception:
+            print("[+] Error: {}. More info: {}".format(exception, sys.exc_info()))
             logging.critical("[TwitterFavorites.get_user_favorites] Error: {}".format(sys.exc_info()))
 
     def get_output(self):
