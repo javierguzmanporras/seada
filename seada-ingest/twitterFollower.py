@@ -23,16 +23,16 @@ class TwitterFollowers:
         user = self.api.get_user(self.username)
         total = user.followers_count
 
-        for follower_id in tqdm(tweepy.Cursor(self.api.followers_ids, screen_name=user).items(total), total=total,
-                             desc="Get Followers"):
+        for follower_id in tqdm(tweepy.Cursor(self.api.followers_ids, screen_name=self.username).items(total),
+                                total=total, desc="[+] Get Followers"):
             try:
                 self.followers_id_list.append(follower_id)
                 api_follower_user = self.api.get_user(follower_id)
                 tu = TwitterUser("")
                 tu.set_user_information(api_follower_user)
                 self.followers_user_list.append(tu)
-            except:
-                print("[+] Error" + str(sys.exc_info()))
+            except Exception as exception:
+                print("[+] Error: {}. More info: {}".format(exception, sys.exc_info()))
                 logging.critical("[TwitterFollowers.get_user_followers] Error {}".format(sys.exc_info()))
 
     def get_output(self):
