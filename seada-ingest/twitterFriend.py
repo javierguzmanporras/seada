@@ -21,16 +21,15 @@ class TwitterFriends:
     def get_user_friends(self, username):
         user = self.api.get_user(username)
         total = user.friends_count
-
-        for friend_id in tqdm(tweepy.Cursor(self.api.friends_ids, screen_name=user).items(total), total=total,
-                            desc="Get Friends"):
-            try:
+        try:
+            for friend_id in tqdm(tweepy.Cursor(self.api.friends_ids, screen_name=username).items(total), total=total,
+                                  desc="[+] Get Friends"):
                 self.friends_id_list.append(friend_id)
                 friend = self.api.get_user(friend_id)
                 self.friends_user_list.append(friend)
-            except:
-                print("[+] Error " + str(sys.exc_info()))
-                logging.critial('[TwitterFriends.get_user_friends] Error {}'.format(sys.exc_info()))
+        except Exception as exception:
+            print("[+] Error: {}. More info: {}".format(exception, sys.exc_info()))
+            logging.critical('[TwitterFriends.get_user_friends] Error {}'.format(sys.exc_info()))
 
     def get_output(self):
         for friend in self.friends_user_list:
