@@ -1,23 +1,15 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # DEASOS - Data Extraction and Analysis System from Open Sources
 
-#examples
-# python3 seadaIngest.py --account kinomakino
-
 import argparse
 import datetime
-import logging
 import os
-import sys
 
 from twitterAccount import TwitterAccount
 from timer import Timer
 from databaseHandler import *
-from tweetMiner import *
 from tweetStreaming import *
 from elasticsearchHandler import *
-from twitterUser import *
 from twitterFavorites import *
 
 __version__ = 0.1
@@ -86,76 +78,70 @@ def config_twitter_api():
         consumer_secret = os.environ['CONSUMER_SECRET']
         access_token = os.environ['ACCESS_TOKEN']
         access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
-    except KeyError as e:
+    except KeyError as error:
         print('[seada-ingest.config_twitter_api] Critical error, ' +
-              str(e) + ' environment variable for access key not found.')
+              str(error) + ' environment variable for access key not found.')
         logging.critical('[seada-ingest.config_twitter_api] Critical error: ' +
-                         str(e) + ' environment variable for access key not found.')
+                         str(error) + ' environment variable for access key not found.')
         sys.exit(-1)
 
     try:
         auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(access_token, access_token_secret)
         api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
-    except tweepy.TweepError as e:
-        print("[seada-ingest.config_twitter_api] Critical error with authentication process " + str(e))
+    except tweepy.TweepError as error:
+        print("[seada-ingest.config_twitter_api] Critical error with authentication process " + str(error))
         logging.critical('[seada-ingest.config_twitter_api] Critical error with authentication process')
         sys.exit(-1)
 
     return api
 
 
-def get_user_information(api, args, username, db, connection, dataset_directory, es_connect):
-    user = TwitterUser(dataset_directory)
-    try:
-        user.set_user_information(api.get_user(username))
-
-        # if args.output == 'csv' or args.output == 'all':
-        #     user.get_csv_output('users_file.csv', dataset_directory)
-        #
-        # if args.output == 'json' or args.output == 'all':
-        #     user.get_json_output('users_file.json', dataset_directory)
-        #
-        # if args.output == 'database' or args.output == 'all':
-        #     user_tuple = user.get_tuple_output()
-        #     row_id = db.create_user(connection, user_tuple)
-
-        user_index_name = "twitter_user"
-        user_mapping_file = "elasticsearch_twitter_user_index_mapping.json"
-        es_connect.create_index(index_name=user_index_name, mapping_file=user_mapping_file)
-        es_connect.store_information_to_elasticsearch(index_name=user_index_name, info=user.user)
-
-    except tweepy.error.TweepError as e:
-        print("[main.test_user] Error: " + str(e))
-
-
-def get_tweets_information(api, args, username, db, connection, dataset_directory, ntweets, es_connect):
-    tm = TweetMiner()
-    tweets_instances, tweets = tm.mine_tweets(api, username, ntweets)
-
-    # if args.output == 'json' or args.output == 'all':
-    #     for tweet in tweets_instances:
-    #         tweet.get_json_output('tweets_file.json', dataset_directory)
-    #
-    # if args.output == 'csv' or args.output == 'all':
-    #     for tweet in tweets_instances:
-    #         tweet.get_csv_output('tweets_file.csv', dataset_directory)
-    #
-    # if args.output == 'database' or args.output == 'all':
-    #     for tweet in tweets_instances:
-    #         db.create_tweet(connection, tweet.get_tuple_output())
-
-    tweet_index_name = "twitter_tweets"
-    tweet_mapping_file = "elasticsearch_twitter_tweets_index_mapping.json"
-    es_connect.create_index(index_name=tweet_index_name, mapping_file=tweet_mapping_file)
-    for tweet in tweets_instances:
-        es_connect.store_information_to_elasticsearch(index_name=tweet_index_name, info=tweet.tweet)
+# def get_user_information(api, args, username, db, connection, dataset_directory, es_connect):
+#     user = TwitterUser(dataset_directory)
+#     try:
+#         user.set_user_information(api.get_user(username))
+#
+#         if args.output == 'csv' or args.output == 'all':
+#             user.get_csv_output('users_file.csv', dataset_directory)
+#
+#         if args.output == 'json' or args.output == 'all':
+#             user.get_json_output('users_file.json', dataset_directory)
+#
+#         if args.output == 'database' or args.output == 'all':
+#             user_tuple = user.get_tuple_output()
+#             row_id = db.create_user(connection, user_tuple)
+#
+#         user_index_name = "twitter_user"
+#         user_mapping_file = "elasticsearch_twitter_user_index_mapping.json"
+#         es_connect.create_index(index_name=user_index_name, mapping_file=user_mapping_file)
+#         es_connect.store_information_to_elasticsearch(index_name=user_index_name, info=user.user)
+#
+#     except tweepy.error.TweepError as e:
+#         print("[main.test_user] Error: " + str(e))
 
 
-def get_streaming(api, args, db, connection, dataset_directory, es_connect):
-    ts = TweetStreaming()
-    ts.start(api, args.streaming, args, db, connection, dataset_directory)
-
+# def get_tweets_information(api, args, username, db, connection, dataset_directory, ntweets, es_connect):
+#     tm = TweetMiner()
+#     tweets_instances, tweets = tm.mine_tweets(api, username, ntweets)
+#
+#     if args.output == 'json' or args.output == 'all':
+#         for tweet in tweets_instances:
+#             tweet.get_json_output('tweets_file.json', dataset_directory)
+#
+#     if args.output == 'csv' or args.output == 'all':
+#         for tweet in tweets_instances:
+#             tweet.get_csv_output('tweets_file.csv', dataset_directory)
+#
+#     if args.output == 'database' or args.output == 'all':
+#         for tweet in tweets_instances:
+#             db.create_tweet(connection, tweet.get_tuple_output())
+#
+#     tweet_index_name = "twitter_tweets"
+#     tweet_mapping_file = "elasticsearch_twitter_tweets_index_mapping.json"
+#     es_connect.create_index(index_name=tweet_index_name, mapping_file=tweet_mapping_file)
+#     for tweet in tweets_instances:
+#         es_connect.store_information_to_elasticsearch(index_name=tweet_index_name, info=tweet.tweet)
 
 def config_database(db_name):
     """
@@ -177,8 +163,8 @@ def config_dataset_output(path):
     if not os.path.exists(path):
         try:
             os.makedirs(path)
-        except os.error as e:
-            print("[config_dataset_output] Fail to create folder " + path + ". Reason: " + str(e))
+        except os.error as error:
+            print("[config_dataset_output] Fail to create folder " + path + ". Reason: " + str(error))
             sys.exit(-1)
 
 
@@ -231,22 +217,26 @@ def main():
     es = config_elasticsearch('localhost', '9200')
     api = config_twitter_api()
 
-    twitter_account = TwitterAccount(api=api,
-                           args=args,
-                           db=db,
-                           db_connection=db_connection,
-                           dataset_directory=dataset_directory,
-                           es_connect=es)
+    dataset_info = {
+        'dataset_directory': dataset_directory,
+        'dataset_users_file_name': 'dataset_users_{}'.format(dataset_suffix),
+        'dataset_tweets_file_name': 'dataset_tweets_{}'.format(dataset_suffix),
+        'dataset_friends_file_name': 'dataset_friends_{}'.format(dataset_suffix),
+        'dataset_followers_file_name': 'dataset_followers_{}'.format(dataset_suffix),
+        'dataset_favorites_file_name': 'dataset_favorites_{}'.format(dataset_suffix)
+    }
 
     if args.account:
-        twitter_account.get_user_information(username=args.account)
-        twitter_account.get_user_output(file_name='dataset_users_{}'.format(dataset_suffix))
-        twitter_account.get_tweets_information(username=args.account, ntweets=args.tweets_number)
-        twitter_account.get_tweets_output(file_name='dataset_tweets_{}'.format(dataset_suffix))
-        twitter_account.get_friends_information(username=args.account)
-        twitter_account.get_friends_output(file_name='dataset_friends_{}'.format(dataset_suffix))
-        twitter_account.get_followers_information(username=args.account)
-        twitter_account.get_favorites_information(username=args.account)
+        twitter_account = TwitterAccount(api=api, args=args, account_name=args.account, db=db,
+                                         db_connection=db_connection, es_connection=es, dataset_info=dataset_info)
+        twitter_account.get_user_information()
+        twitter_account.get_user_output()
+        twitter_account.get_tweets_information()
+        twitter_account.get_tweets_output()
+        twitter_account.get_friends_information()
+        twitter_account.get_friends_output()
+        twitter_account.get_followers_information()
+        twitter_account.get_favorites_information()
 
         print('[+] Download and storage {user} information in {time} seconds.'.format(user=args.account,
                                                                                       time=Timer.timers['user_info']))
@@ -263,13 +253,24 @@ def main():
         print('[+] Download {} favorites in {} seconds'.format(args.account, Timer.timers['favorites_info']))
 
     if args.account_list:
+        twitter_accounts = []
         for account in args.account_list:
-            get_user_information(api, args, account, db, db_connection, dataset_directory, es_connect=es)
-            get_tweets_information(api, args, account, db, db_connection, dataset_directory, args.tweets_number,
-                                   es_connect=es)
+            twitter_account = TwitterAccount(api=api, args=args, account_name=account, db=db,
+                                             db_connection=db_connection, es_connection=es, dataset_info=dataset_info)
+            twitter_account.get_user_information()
+            twitter_account.get_user_output()
+            twitter_account.get_tweets_information()
+            twitter_account.get_tweets_output()
+            twitter_account.get_friends_information()
+            twitter_account.get_friends_output()
+            twitter_account.get_followers_information()
+            twitter_account.get_favorites_information()
+
+            twitter_accounts.append(twitter_account)
 
     if args.streaming:
-        get_streaming(api, args, db, db_connection, dataset_directory, es_connect=es)
+        ts = TweetStreaming()
+        ts.start(api, args.streaming, args, db, db_connection, dataset_directory)
 
     sys.exit(0)
 
