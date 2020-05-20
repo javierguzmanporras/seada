@@ -7,9 +7,9 @@ import logging
 
 from tqdm import tqdm
 from twitterTweet import Tweet
+from outputInterface import OutputInterface
 
-
-class TwitterFavorites:
+class TwitterFavorites(OutputInterface):
     """Information about a Twitter user's Favorites"""
 
     def __init__(self, username, api):
@@ -38,3 +38,12 @@ class TwitterFavorites:
     def get_output(self):
         for favorite in self.favorites_list:
             print(favorite.text)
+
+    def get_csv_output(self, file_name: str, dataset_directory: str):
+        pass
+
+    def get_json_output(self, file_name: str, dataset_directory: str):
+        pass
+
+    def get_tuple_output(self) -> tuple:
+        pass
