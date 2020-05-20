@@ -1,5 +1,6 @@
 import csv
 import json
+import logging
 
 
 class OutputUtilities:
@@ -21,17 +22,34 @@ class OutputUtilities:
         return None
 
     @classmethod
-    def get_json_output(cls, file_name, dataset_directory, item):
+    def get_json_output(cls, file_name, dataset_directory, item, datatag='data_list'):
         """
-        Generate a json file from user information. If the file exists, append new item.
+        Generate a json file from item information. If the file exists, append new item.
         :return: a new json file, or a new item
         """
         path_file = dataset_directory + '/' + file_name
-        with open(path_file, mode='a+', encoding='utf8') as user_file:
+        try:
+            with open(path_file) as json_file:
+                data_temp = json.load(json_file)
+                list_temp = data_temp[datatag]
+                list_temp.append(item)
+                data = {datatag: list_temp}
+        except IOError:
+            logging.warning('[outputUtilities.get_json_output] IOError: File json not exits')
+            data_list = [item]
+            data = {datatag: data_list}
+        except Exception as exception:
+            print('[+] Error: {}'.format(exception))
+            logging.exception('[outputUtilities.get_json_output] Error with json files: {}'.format(exception))
+
+        with open(path_file, mode='w', encoding='utf8') as user_file:
             try:
-                json.dump(item, user_file, indent=4, ensure_ascii=False) # indent=4 nos formatea la salida del texto.
+                json.dump(data, user_file, indent=4, ensure_ascii=False)  # indent=4 nos formatea la salida del texto.
             except TypeError as e:
-                print("[SeadaUtils][get_json_output] TypeError: " + str(e))
+                logging.exception('[outputUtilities.get_json_output] TypeError: ' + str(e))
+            except Exception as exception:
+                print('[+] Error: {}'.format(exception))
+                logging.exception('[outputUtilities.get_json_output] Error with json files: {}'.format(exception))
 
     @classmethod
     def get_csv_output(cls, file_name, dataset_directory, item):
