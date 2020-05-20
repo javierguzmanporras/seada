@@ -1,11 +1,7 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from twitterUser import TwitterUser
-from twitterFriend import TwitterFriends
-from twitterFollower import TwitterFollowers
 from tweetMiner import TweetMiner
-from twitterFavorites import TwitterFavorites
 from timer import Timer
 
 import tweepy
@@ -33,11 +29,10 @@ class TwitterAccount:
         self.tm = TweetMiner(api=api, username=account_name, num_tweets=args.tweets_number)
         self.user_tweets = []
         self.user_friends = []
+        self.user_friends_id_list = []
         self.user_followers = []
+        self.user_followers_id_list = []
         self.user_favorites = []
-        self.tf = TwitterFriends(api=self.api)
-        self.tfollower = TwitterFollowers(username=self.account_name, api=self.api)
-        self.t_favorites = TwitterFavorites(username=self.account_name, api=self.api)
 
     def get_user_information(self):
         try:
@@ -75,7 +70,7 @@ class TwitterAccount:
 
     def get_tweets_information(self):
         self.timer_tweets_info.start()
-        self.user_tweets = self.tm.mine_tweets(self.api, self.account_name, self.args.tweets_number)
+        self.user_tweets = self.tm.mine_tweets()
         self.es_connection.create_index(index_name=self.es_connection.twitter_tweet_index_name,
                                         mapping_file=self.es_connection.twitter_tweet_mapping_file,
                                         debug=self.args.debug)
@@ -89,7 +84,7 @@ class TwitterAccount:
     def get_tweets_output(self):
         if self.args.output == 'json' or self.args.output == 'all':
             file_name = self.dataset_info['dataset_tweets_file_name'] + '.json'
-            for tweet in self.tm.tweets_instances:
+            for tweet in self.user_tweets:
                 tweet.get_json_output(file_name=file_name, dataset_directory=self.dataset_info['dataset_directory'])
 
             print('[+] {} output file created'.format(file_name))
@@ -97,14 +92,14 @@ class TwitterAccount:
 
         if self.args.output == 'csv' or self.args.output == 'all':
             file_name = self.dataset_info['dataset_tweets_file_name'] + '.csv'
-            for tweet in self.tm.tweets_instances:
+            for tweet in self.user_tweets:
                 tweet.get_csv_output(file_name=file_name, dataset_directory=self.dataset_info['dataset_directory'])
 
             print('[+] {} output file created'.format(file_name))
             logging.info('[seada.get_user_information] {} output file created'.format(file_name))
 
         if self.args.output == 'database' or self.args.output == 'all':
-            for tweet in self.tm.tweets_instances:
+            for tweet in self.user_tweets:
                 self.db.create_tweet(self.db_connection, tweet.get_tuple_output_without_raw())
 
             print('[+] database updated with {} tweets.'.format(self.args.tweets_number))
@@ -112,16 +107,15 @@ class TwitterAccount:
 
     def get_friends_information(self):
         self.timer_friends_info.start()
-        self.tf.get_user_friends(username=self.account_name)
+        self.user_friends, self.user_friends_id_list = self.tm.mine_friends()
         self.es_connection.create_index(index_name=self.es_connection.twitter_friend_index_name,
                                         mapping_file=self.es_connection.twitter_friend_mapping_file,
                                         debug=self.args.debug)
-
         data = {
             "id": self.user.id,
             "name": self.user.name,
             "screen_name": self.user.screen_name,
-            "friend_list": self.tf.friends_id_list
+            "friend_list": self.user_friends_id_list
         }
 
         self.es_connection.store_information_to_elasticsearch(index_name=self.es_connection.twitter_friend_index_name,
@@ -131,59 +125,65 @@ class TwitterAccount:
     def get_friends_output(self):
         if self.args.output == 'json' or self.args.output == 'all':
             file_name = self.dataset_info['dataset_friends_file_name'] + '.json'
-            self.tf.get_json_output(file_name=file_name, dataset_directory=self.dataset_info['dataset_directory'])
+
+            for friend in self.user_friends:
+                friend.get_json_output(file_name=file_name, dataset_directory=self.dataset_info['dataset_directory'])
+
             print('[+] {} output file created'.format(file_name))
             logging.info('[seada.get_friends_output] JSON output file created')
 
     def get_followers_information(self):
         self.timer_followers_info.start()
-        self.tfollower.get_user_followers()
-        # tfollower.get_output()
-
+        self.user_followers, self.user_followers_id_list = self.tm.mine_followers()
         self.es_connection.create_index(index_name=self.es_connection.twitter_follower_index_name,
                                         mapping_file=self.es_connection.twitter_follower_mapping_file,
                                         debug=self.args.debug)
-
         data = {
             'id': self.user.id,
             'name': self.user.name,
             'screen_name': self.user.screen_name,
-            'follower_list': self.tfollower.followers_id_list
+            'follower_list': self.user_followers_id_list
         }
-
         self.es_connection.store_information_to_elasticsearch(index_name=self.es_connection.twitter_follower_index_name,
                                                               info=data, debug=self.args.debug)
         self.timer_followers_info.stop()
 
     def get_followers_output(self):
-        pass
+        if self.args.output == 'json' or self.args.output == 'all':
+            file_name = self.dataset_info['dataset_followers_file_name'] + '.json'
+
+            for follower in self.user_followers:
+                follower.get_json_output(file_name=file_name, dataset_directory=self.dataset_info['dataset_directory'])
+
+            print('[+] {} output file created'.format(file_name))
+            logging.info('[seada.get_followers_output] JSON output file created')
 
     def get_favorites_information(self):
         self.timer_favorites_info.start()
-        self.t_favorites.get_user_favorites()
+        self.user_favorites = self.tm.mine_favorites()
         user = self.api.get_user(self.account_name)
-
         self.es_connection.create_index(index_name=self.es_connection.twitter_favorite_index_name,
                                         mapping_file=self.es_connection.twitter_favorite_mapping_file,
                                         debug=self.args.debug)
 
-        for favorite in self.t_favorites.favorites_list:
+        for favorite in self.user_favorites:
             data = {
+                # TODO change @user_id
                 '@user_id': user.id,
                 'user_name': user.name,
                 'user_screen_name': user.screen_name,
-                'created_at': favorite.created_at,
-                'id': favorite.id,
-                'text': favorite.text,
-                'source': favorite.source,
-                'coordinates': favorite.coordinates,
-                'place': favorite.place,
-                'retweet_count': favorite.retweet_count,
-                'favorite_count': favorite.favorite_count,
-                'lang': favorite.lang,
-                'hashtags': favorite.entities_hashtags,
-                'user_mentions': favorite.entities_user_mentions,
-                'urls': favorite.entities_urls
+                'created_at': favorite.favorite.created_at,
+                'id': favorite.favorite.id,
+                'text': favorite.favorite.text,
+                'source': favorite.favorite.source,
+                'coordinates': favorite.favorite.coordinates,
+                'place': favorite.favorite.place,
+                'retweet_count': favorite.favorite.retweet_count,
+                'favorite_count': favorite.favorite.favorite_count,
+                'lang': favorite.favorite.lang,
+                'hashtags': favorite.favorite.entities_hashtags,
+                'user_mentions': favorite.favorite.entities_user_mentions,
+                'urls': favorite.favorite.entities_urls
             }
 
             self.es_connection.store_information_to_elasticsearch(
@@ -192,4 +192,11 @@ class TwitterAccount:
         self.timer_favorites_info.stop()
 
     def get_favorites_output(self):
-        pass
+        if self.args.output == 'json' or self.args.output == 'all':
+            file_name = self.dataset_info['dataset_favorites_file_name'] + '.json'
+
+            for favorite in self.user_favorites:
+                favorite.get_json_output(file_name=file_name, dataset_directory=self.dataset_info['dataset_directory'])
+
+            print('[+] {} output file created'.format(file_name))
+            logging.info('[seada.get_favorites_output] JSON output file created')
