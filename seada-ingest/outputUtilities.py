@@ -2,7 +2,7 @@ import csv
 import json
 
 
-class SeadaUtils:
+class OutputUtilities:
     """Common json and csv utilities"""
 
     @classmethod
