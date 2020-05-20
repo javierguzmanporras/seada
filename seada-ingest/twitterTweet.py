@@ -61,6 +61,7 @@ class Tweet(OutputInterface):
         self.tweet['in_reply_to_screen_name'] = item.in_reply_to_screen_name
         self.coordinates = item.coordinates
         self.tweet['coordinates'] = item.coordinates
+        # TODO place is an tweepy.api.API object with many items or attributes
         self.place = item.place
         self.tweet['place'] = item.place
         self.contributors = item.contributors
@@ -124,7 +125,8 @@ class Tweet(OutputInterface):
         """
         item = dict(self.tweet)
         item['created_at'] = str(item['created_at'])
-        OutputUtilities.get_json_output(file_name=file_name, dataset_directory=dataset_directory, item=item)
+        OutputUtilities.get_json_output(file_name=file_name, dataset_directory=dataset_directory, item=item,
+                                        datatag='tweet_list')
 
     def get_csv_output(self, file_name, dataset_directory):
         """
@@ -134,7 +136,6 @@ class Tweet(OutputInterface):
         :return: a csv file in dataset_directory.
         """
         item = list(self.get_tuple_output_without_raw())
-        #item.pop(-1)
         OutputUtilities.get_csv_output(file_name=file_name, dataset_directory=dataset_directory, item=item)
 
     def get_tuple_output_without_raw(self):
