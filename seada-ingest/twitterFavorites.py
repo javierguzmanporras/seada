@@ -1,49 +1,42 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
-import tweepy
-import logging
-
-from tqdm import tqdm
-from twitterTweet import Tweet
 from outputInterface import OutputInterface
+from outputUtilities import OutputUtilities
+
 
 class TwitterFavorites(OutputInterface):
     """Information about a Twitter user's Favorites"""
 
-    def __init__(self, username, api):
-        self.username = username
-        self.api = api
-        self.favorites_list = []
-
-    def get_user_favorites(self):
-
-        user = self.api.get_user(self.username)
-        total = user.favourites_count
-
-        print('[+] Retrieving {total} favorites from {username}'.format(total=total, username=self.username))
-
-        try:
-            for favorite in tqdm(tweepy.Cursor(self.api.favorites, screen_name=self.username).items(total),
-                                 total=total, desc="[+] Get Favorite"):
-
-                tweet = Tweet()
-                tweet.set_tweet_information(favorite)
-                self.favorites_list.append(tweet)
-        except Exception as exception:
-            print("[+] Error: {}. More info: {}".format(exception, sys.exc_info()))
-            logging.critical("[TwitterFavorites.get_user_favorites] Error: {}".format(sys.exc_info()))
-
-    def get_output(self):
-        for favorite in self.favorites_list:
-            print(favorite.text)
+    def __init__(self, user_id, favorite):
+        self.user_id = user_id
+        self.favorite = favorite
 
     def get_csv_output(self, file_name: str, dataset_directory: str):
         pass
 
     def get_json_output(self, file_name: str, dataset_directory: str):
-        pass
+        """
+        Generate a json file from user's friends information. If the file exists, append new item
+        :return:
+        """
+        item = {
+            'user_id': self.user_id,
+            'favorite_created_at': str(self.favorite.created_at),
+            'favorite_id': self.favorite.id,
+            'favorite_text': self.favorite.text,
+            'favorite_source': self.favorite.source,
+            'favorite_coordinates': self.favorite.coordinates,
+            'favorite_place': str(self.favorite.place),
+            'favorite_retweet_count': self.favorite.retweet_count,
+            'favorite_favorite_count': self.favorite.favorite_count,
+            'favorite_lang': self.favorite.lang,
+            'favorite_hashtags': self.favorite.entities_hashtags,
+            'favorite_user_mentions': self.favorite.entities_user_mentions,
+            'favorite_urls': self.favorite.entities_urls
+        }
+
+        OutputUtilities.get_json_output(file_name=file_name, dataset_directory=dataset_directory,
+                                        item=item, datatag='favorites_list')
 
     def get_tuple_output(self) -> tuple:
         pass
