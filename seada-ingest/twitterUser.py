@@ -1,7 +1,6 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import outputUtilities
+from outputUtilities import OutputUtilities
 from outputInterface import OutputInterface
 
 
@@ -42,7 +41,7 @@ class TwitterUser(OutputInterface):
         :param user: tweepy object user
         :return: None
         """
-        self.raw_json_user = outputUtilities.OutputUtilities.json_to_string(user)
+        self.raw_json_user = OutputUtilities.json_to_string(user)
         self.id = user.id
         self.user['id'] = user.id
         self.name = user.name
@@ -94,7 +93,7 @@ class TwitterUser(OutputInterface):
         """
         item = list(self.get_tuple_output())
         item.pop(-1)
-        outputUtilities.OutputUtilities.get_csv_output(file_name, dataset_directory, item)
+        OutputUtilities.get_csv_output(file_name, dataset_directory, item)
 
     def get_json_output(self, file_name, dataset_directory):
         """
@@ -103,7 +102,8 @@ class TwitterUser(OutputInterface):
         """
         item = dict(self.user)
         item['created_at'] = str(item['created_at'])
-        outputUtilities.OutputUtilities.get_json_output(file_name=file_name, dataset_directory=dataset_directory, item=item)
+        OutputUtilities.get_json_output(file_name=file_name, dataset_directory=dataset_directory,
+                                        item=item, datatag='user_list')
 
     def get_tuple_output(self):
         """
