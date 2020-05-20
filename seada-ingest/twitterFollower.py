@@ -7,9 +7,10 @@ import logging
 
 from tqdm import tqdm
 from twitterUser import TwitterUser
+from outputInterface import OutputInterface
 
 
-class TwitterFollowers:
+class TwitterFollowers(OutputInterface):
     """Information about a Twitter user's followers"""
 
     def __init__(self, username, api):
@@ -38,4 +39,13 @@ class TwitterFollowers:
     def get_output(self):
         for follower in self.followers_user_list:
             print(follower.name)
+
+    def get_csv_output(self, file_name: str, dataset_directory: str):
+        pass
+
+    def get_json_output(self, file_name: str, dataset_directory: str):
+        pass
+
+    def get_tuple_output(self) -> tuple:
+        pass
 
