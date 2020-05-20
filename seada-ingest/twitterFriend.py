@@ -4,13 +4,14 @@
 import sys
 import tweepy
 import logging
-import seadaUtils
+import outputUtilities
+from outputInterface import OutputInterface
 
 from timer import Timer
 from tqdm import tqdm
 
 
-class TwitterFriends:
+class TwitterFriends(OutputInterface):
     """Information about a Twitter user's friends"""
 
     def __init__(self, api):
@@ -35,23 +36,32 @@ class TwitterFriends:
         for friend in self.friends_user_list:
             print(friend.name)
 
-    def get_json_output(self, file_name, dataset_directory):
+    def get_csv_output(self, file_name: str, dataset_directory: str):
+       pass
+
+    def get_json_output(self, file_name: str, dataset_directory: str):
         """
         Generate a json file from user's friends information. If the file exists, append new item
         :return: a new json file, or a new item
         """
         item = {'data': self.friends_id_list}
-        seadaUtils.SeadaUtils.get_json_output(file_name=file_name, dataset_directory=dataset_directory, item=item)
+        outputUtilities.OutputUtilities.get_json_output(file_name=file_name, dataset_directory=dataset_directory, item=item)
 
-    def get_cvs_output(self, file_name, dataset_directory):
-        """
-        Generate a CVS file from user information instance. If the file exists, append info in new row.
-        :return: a new csv file or a new row.
-        """
+    def get_tuple_output(self) -> tuple:
         pass
 
-    def get_tuple_output(self):
-        pass
+
+
+    #
+    # def get_cvs_output(self, file_name, dataset_directory):
+    #     """
+    #     Generate a CVS file from user information instance. If the file exists, append info in new row.
+    #     :return: a new csv file or a new row.
+    #     """
+    #     pass
+    #
+    # def get_tuple_output(self):
+    #     pass
 
 
 
