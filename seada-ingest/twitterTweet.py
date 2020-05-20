@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from seadaUtils import *
+from outputUtilities import *
+from outputInterface import OutputInterface
 
 
-class Tweet:
+class Tweet(OutputInterface):
     """Tweets of Users"""
 
     def __init__(self):
@@ -43,7 +44,7 @@ class Tweet:
         :param item:
         :return:
         """
-        self.raw_tweet = SeadaUtils.json_to_string(item)
+        self.raw_tweet = OutputUtilities.json_to_string(item)
         self.created_at = item.created_at
         self.tweet['created_at'] = item.created_at
         self.id = item.id
@@ -123,7 +124,7 @@ class Tweet:
         """
         item = dict(self.tweet)
         item['created_at'] = str(item['created_at'])
-        SeadaUtils.get_json_output(file_name=file_name, dataset_directory=dataset_directory, item=item)
+        OutputUtilities.get_json_output(file_name=file_name, dataset_directory=dataset_directory, item=item)
 
     def get_csv_output(self, file_name, dataset_directory):
         """
@@ -134,7 +135,7 @@ class Tweet:
         """
         item = list(self.get_tuple_output_without_raw())
         #item.pop(-1)
-        SeadaUtils.get_csv_output(file_name=file_name, dataset_directory=dataset_directory, item=item)
+        OutputUtilities.get_csv_output(file_name=file_name, dataset_directory=dataset_directory, item=item)
 
     def get_tuple_output_without_raw(self):
         """
