@@ -12,8 +12,10 @@ import yaml
 from Alert import *
 from Sender import *
 
-# from /seadaIngest/elasticsearchHandler import ElasticSearchUtils
-from .. seadaIngest.elasticsearchHandler import ElasticSearchUtils
+#from elasticsearchHandler import ElasticSearchUtils
+#from ..seadaIngest.elasticsearchHandler import ElasticSearchUtils
+
+from ..seadaIngest.timer import Timer
 
 
 
@@ -188,17 +190,17 @@ def main():
     # print()
     # print()
 
-    seada_alert_path = os.path.abspath("")
-    #print('seada_alert_path: {}'.format(seada_alert_path))
-    #print('os.path: {}'.format(os.path))
-    new_path = os.path.join(seada_alert_path, "../seadaIngest/")
-    #print('new_path: {}'.format(new_path))
-    #print('os.path: {}'.format(os.path))
-
+    # currentdir = os.path.abspath("")
+    # #print('seada_alert_path: {}'.format(seada_alert_path))
+    # #print('os.path: {}'.format(os.path))
+    # new_dir = os.path.join(currentdir, "../seadaIngest/")
+    # #print('new_path: {}'.format(new_path))
+    # #print('os.path: {}'.format(os.path))
+    #
+    # # print(sys.path)
+    # #sys.path.insert(0, new_path)
+    # sys.path.append(new_path)
     # print(sys.path)
-    #sys.path.insert(0, new_path)
-    sys.path.append(new_path)
-    print(sys.path)
 
 
     if config:
