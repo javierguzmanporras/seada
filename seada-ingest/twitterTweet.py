@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from outputUtilities import *
@@ -61,9 +60,6 @@ class Tweet(OutputInterface):
         self.tweet['in_reply_to_screen_name'] = item.in_reply_to_screen_name
         self.coordinates = item.coordinates
         self.tweet['coordinates'] = item.coordinates
-        # TODO place is an tweepy.api.API object with many items or attributes
-        self.place = item.place
-        self.tweet['place'] = item.place
         self.contributors = item.contributors
         self.tweet['contributors'] = item.contributors
         self.is_quote_status = item.is_quote_status
@@ -85,6 +81,10 @@ class Tweet(OutputInterface):
         self.user_screen_name = item.user.screen_name
         self.tweet['user_screen_name'] = item.user.screen_name
         self.user = item.user
+
+        # place object have many attributes like place_type, name, country, coordinates, etc...
+        self.place = str(item.place)
+        self.tweet['place'] = str(item.place)
 
         try:
             self.text = item.full_text
@@ -143,12 +143,13 @@ class Tweet(OutputInterface):
         Generate a tuple with tweet information without raw information for input database
         :return: A tuple with tweet information
         """
+        text = self.text.replace("\n", "")
         # You could pickle/marshal/json your array and store it as binary/varchar/json field in your database.
         hashtags_json = json.dumps(self.entities_hashtags)
         user_mentions_json = json.dumps(self.entities_user_mentions)
         urls_json = json.dumps(self.entities_urls)
 
-        tuple_tweet = (self.id, self.created_at, self.text, self.truncated, self.source,
+        tuple_tweet = (self.id, self.created_at, text, self.truncated, self.source,
                        self.in_reply_to_status_id_str, self.in_reply_to_user_id_str, self.in_reply_to_screen_name,
                        self.coordinates, self.place, self.contributors,
                        self.is_quote_status, self.retweet_count, self.favorite_count, self.favorited, self.retweeted,
