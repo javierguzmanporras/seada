@@ -1,11 +1,11 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import sqlite3
+import logging
 
 
 class Database:
-    """Database for twitter"""
+    """Database for dataset output"""
 
     def __init__(self):
         pass
@@ -18,8 +18,9 @@ class Database:
         connection = None
         try:
             connection = sqlite3.connect(database_name)
-        except sqlite3.Error as e:
-            print("[create_connection] Error: " + str(e))
+        except sqlite3.Error as error:
+            print('[+] Error with database connection: {}'.format(error))
+            logging.critical("[Database.create_connection] Connection Exception: {}".format(error))
 
         return connection
 
@@ -44,18 +45,30 @@ class Database:
                           "retweetd text, possibly_sensitive text, lang text, user_id text, user_name text, " \
                           "user_screen_name text, hashtags text, user_mentions text, urls text)"
 
-        # self.tuit = {}
-        # self.entities_hashtags = []
-        # self.entities_user_mentions = []
-        # self.entities_urls = []
+        friend_table_sql_query = "CREATE TABLE IF NOT EXISTS friend(friend_id integer PRIMARY KEY, user_id text)"
+
+        follower_table_sql_query = "CREATE TABLE IF NOT EXISTS follower(follower_id integer PRIMARY KEY, user_id text)"
+
+        favorites_table_sql_query = "CREATE TABLE IF NOT EXISTS favorite(favorite_id integer PRIMARY KEY, " \
+                                    "user_id text, favorite_created_at text, favorite_text text, " \
+                                    "favorite_source text, favorite_place text, " \
+                                    "favorite_retweet_count text, favorite_favorite_count text, favorite_lang text, " \
+                                    "favorite_hashtags text, favorite_user_mentions text, favorite_urls text)"
 
         try:
             cursor = connection.cursor()
             cursor.execute(user_sql_query)
             cursor.execute(tweet_sql_query)
+            cursor.execute(friend_table_sql_query)
+            cursor.execute(follower_table_sql_query)
+            cursor.execute(favorites_table_sql_query)
             connection.commit()
-        except sqlite3.Error as e:
-            print("[create_table] Error: " + str(e))
+        except sqlite3.Error as error:
+            print('[+] Error with database table creation: {}'.format(error))
+            logging.critical("[Database.create_table] Exception: {}".format(error))
+        except Exception as exception:
+            print('[+] Error at create table in database: {}'.format(exception))
+            logging.error('[Database.create_table] Exception: {}'.format(exception))
 
     def create_user(self, connection, user):
         """
@@ -74,7 +87,7 @@ class Database:
         try:
             cursor.execute(sql_query, user)
         except sqlite3.IntegrityError:
-            print("[create_user] User was created before in database")
+            logging.warning('[Database.create_user] User {} was created before in database'.format(user))
 
         connection.commit()
         return cursor.lastrowid
@@ -86,11 +99,6 @@ class Database:
         :param tweet: Tuple objetct of Tweet
         :return: ¿¿??
         """
-        # sql_query = '''INSERT INTO tweet(id, created_at, text, truncated, source, in_reply_to_status_id_str,
-        # in_reply_to_user_id_str, in_reply_to_screen_name, coordinates, place, contributors, is_quote_status,
-        # retweet_count, favorite_count, favorited, retweetd, possibly_sensitive, lang, raw_tweet)
-        # VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'''
-
         sql_query = '''INSERT INTO tweet(id, created_at, text, truncated, source, in_reply_to_status_id_str,
                  in_reply_to_user_id_str, in_reply_to_screen_name, coordinates, place, contributors, is_quote_status, 
                  retweet_count, favorite_count, favorited, retweetd, possibly_sensitive, lang, user_id, user_name, 
@@ -101,13 +109,59 @@ class Database:
         try:
             cursor.execute(sql_query, tweet)
         except sqlite3.IntegrityError:
-            print("[Database][create_tweet] Tweet was created before in database")
+            logging.warning('[Database.create_tweet] Tweet was created before in database')
         except sqlite3.InterfaceError:
-            pass
+            logging.error('[Database.create_tweet] Error with sqlite3.Interface')
+        except Exception as exception:
+            logging.error('[database.create_tweet] Exception: {}'.format(exception))
 
         connection.commit()
         return cursor.lastrowid
 
+    def create_friend(self, connection, friend):
+        sql_query = '''INSERT INTO friend(friend_id, user_id) VALUES (?,?)'''
+        cursor = connection.cursor()
+        try:
+            cursor.execute(sql_query, friend)
+        except sqlite3.IntegrityError:
+            logging.error('[database.create_friend] Friend was created before in database')
+        except sqlite3.InterfaceError:
+            logging.error('[database.create_friend] Interface error')
+        except Exception as exception:
+            logging.error('[database.create_friend] Exception: {}'.format(exception))
 
+        connection.commit()
+        return cursor.lastrowid
 
+    def create_follower(self, connection, follower):
+        sql_query = '''INSERT INTO follower(follower_id, user_id) VALUES (?,?)'''
+        cursor = connection.cursor()
+        try:
+            cursor.execute(sql_query, follower)
+        except sqlite3.IntegrityError:
+            logging.error('[database.create_follower] Follower was created before in database')
+        except sqlite3.InterfaceError:
+            logging.error('[database.create_follower] Interface error')
+        except Exception as exception:
+            logging.error('[database.create_follower] Exception: {}'.format(exception))
 
+        connection.commit()
+        return cursor.lastrowid
+
+    def create_favorites(self, connection, favorite):
+        sql_query = '''INSERT INTO favorite(favorite_id, user_id, favorite_created_at, favorite_text,
+        favorite_source, favorite_place, favorite_retweet_count, favorite_favorite_count,
+        favorite_lang, favorite_hashtags, favorite_user_mentions, favorite_urls) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)'''
+
+        cursor = connection.cursor()
+        try:
+            cursor.execute(sql_query, favorite)
+        except sqlite3.IntegrityError:
+            logging.error('[database.create_favorites] Favorite was created before in database')
+        except sqlite3.InterfaceError:
+            logging.error('[database.create_favorites] Interface error')
+        except Exception as exception:
+            logging.error('[database.create_favorites] Exception: {}'.format(exception))
+
+        connection.commit()
+        return cursor.lastrowid
