@@ -110,7 +110,8 @@ class TwitterUser(OutputInterface):
         Generate a tuple with user information for input database
         :return: A tuple with user information
         """
-        tuple_user = (self.id, self.name, self.screen_name, self.location, self.description, self.url,
+        description = self.description.replace("\n", "")
+        tuple_user = (self.id, self.name, self.screen_name, self.location, description, self.url,
                       self.protected, self.followers_count, self.friends_count, self.listed_count, str(self.created_at),
                       self.favourites_count, self.geo_enabled, self.verified, self.statuses_count,
                       self.profile_image_url_https, self.profile_banner_url, self.default_profile,
