@@ -5,6 +5,7 @@ import argparse
 import datetime
 import os
 import sys
+import logging
 
 from twitterAccount import TwitterAccount
 from timer import Timer
@@ -17,7 +18,7 @@ __version__ = 0.1
 
 def banner():
     """
-    Function for print a banner
+    Print a banner when the program starts
     """
     try:
         seada_path = os.path.abspath(os.path.dirname(__file__))
@@ -27,15 +28,17 @@ def banner():
             print(line.replace("\n", ""))
         banner_file.close()
     except FileNotFoundError:
-        print('[main][banner] Error: The banner file not found')
+        print('[+] Error: The banner file not found')
+        logging.error('[seadaIngest.banner] Error: The banner file not found')
     except Exception as exception:
-        print(exception)
+        print('[+] Exception: {}'.format(exception))
+        logging.critical('[seadaIngest.banner] Exception: {}'.format(exception))
         raise
 
 
 def parse_args():
     """
-    Method for get the arguments input of seada-ingest program.
+    Method for get the arguments input of seadaIngest tool.
     :return: A Namespace class of argparse.
     """
     parser = argparse.ArgumentParser(prog='seadaIngest.py',
@@ -79,9 +82,8 @@ def config_twitter_api():
         access_token = os.environ['ACCESS_TOKEN']
         access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
     except KeyError as error:
-        print('[seada-ingest.config_twitter_api] Critical error, ' +
-              str(error) + ' environment variable for access key not found.')
-        logging.critical('[seada-ingest.config_twitter_api] Critical error: ' +
+        print('[+] Critical error, {} environment variable for access key not found.'.format(error))
+        logging.critical('[SeadaIngest.config_twitter_api] Critical error: ' +
                          str(error) + ' environment variable for access key not found.')
         sys.exit(-1)
 
@@ -90,8 +92,8 @@ def config_twitter_api():
         auth.set_access_token(access_token, access_token_secret)
         api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
     except tweepy.TweepError as error:
-        print("[seada-ingest.config_twitter_api] Critical error with authentication process " + str(error))
-        logging.critical('[seada-ingest.config_twitter_api] Critical error with authentication process')
+        print("[+] Critical error with authentication process {}".format(error))
+        logging.critical('[SeadaIngest.config_twitter_api] Critical error with auth process {}'.format(error))
         sys.exit(-1)
 
     return api
@@ -118,7 +120,9 @@ def config_dataset_output(path):
         try:
             os.makedirs(path)
         except os.error as error:
-            print("[config_dataset_output] Fail to create folder " + path + ". Reason: " + str(error))
+            print("[+] Fail to create dataset folder {}. Reason: {}".format(path, error))
+            logging.critical('[SeadaIngest.config_dataset_output] Fail to create dataset folder {}. '
+                             'Reason: {}'.format(path, error))
             sys.exit(-1)
 
 
@@ -132,20 +136,21 @@ def config_logging():
         path = os.path.join(seada_path, "../data/seada-ingest.log")
         logging.basicConfig(filename=path, filemode='a', format='%(asctime)s %(levelname)s-%(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
-        logging.info("seada-ingest started!")
+        logging.info("SeadaIngest started!")
     except Exception as exception:
-        print(exception)
+        print('[+] Fail to configure logging feature. Reason: {}'.format(exception))
+        logging.critical('[seadaIngest.config_logging] Exception: {}'.format(exception))
         sys.exit(-1)
 
 
 def config_elasticsearch(es_host, es_port):
-    _es = None
-    _es = ElasticSearchUtils(es_host=es_host, es_port=es_port)
-    es_connection = _es.connect_elasticsearch()
+    es = None
+    es = ElasticSearchUtils(es_host=es_host, es_port=es_port)
+    es_connection = es.connect_elasticsearch()
     if es_connection:
-        _es.es_connection = es_connection
+        es.es_connection = es_connection
 
-    return _es
+    return es
 
 
 def main():
