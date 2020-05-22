@@ -37,6 +37,7 @@ class TwitterAccount:
     def get_user_information(self):
         try:
             self.timer_user_info.start()
+            print('[+] Retrieving {} information...'.format(self.account_name))
             self.user.set_user_information(self.api.get_user(self.account_name))
             self.es_connection.create_index(index_name=self.es_connection.twitter_user_index_name,
                                             mapping_file=self.es_connection.twitter_user_mapping_file,
@@ -54,22 +55,23 @@ class TwitterAccount:
             file_name = self.dataset_info['dataset_users_file_name'] + '.json'
             self.user.get_json_output(file_name=file_name, dataset_directory=self.dataset_info['dataset_directory'])
             print('[+] {} output file created'.format(file_name))
-            logging.info('[seada.get_user_information] JSON output file created')
+            logging.info('[twitterAccount.get_user_information] JSON output file created')
 
         if self.args.output == 'csv' or self.args.output == 'all':
             file_name = self.dataset_info['dataset_users_file_name'] + '.csv'
             self.user.get_csv_output(file_name=file_name, dataset_directory=self.dataset_info['dataset_directory'])
             print('[+] {} output file created'.format(file_name))
-            logging.info('[seada.get_user_information] CSV output file created')
+            logging.info('[twitterAccount.get_user_information] CSV output file created')
 
         if self.args.output == 'database' or self.args.output == 'all':
             user_tuple = self.user.get_tuple_output()
             self.db.create_user(self.db_connection, user_tuple)
-            print('[+] database update wih user information')
-            logging.info('[seada.get_user_information] database output file created')
+            print('[+] Database update wih {} information'.format(self.account_name))
+            logging.info('[twitterAccount.get_user_information] database output file created')
 
     def get_tweets_information(self):
         self.timer_tweets_info.start()
+        print('[+] Retrieving {} tweets from {}'.format(self.args.tweets_number, self.account_name))
         self.user_tweets = self.tm.mine_tweets()
         self.es_connection.create_index(index_name=self.es_connection.twitter_tweet_index_name,
                                         mapping_file=self.es_connection.twitter_tweet_mapping_file,
@@ -84,26 +86,29 @@ class TwitterAccount:
     def get_tweets_output(self):
         if self.args.output == 'json' or self.args.output == 'all':
             file_name = self.dataset_info['dataset_tweets_file_name'] + '.json'
+
             for tweet in self.user_tweets:
                 tweet.get_json_output(file_name=file_name, dataset_directory=self.dataset_info['dataset_directory'])
 
             print('[+] {} output file created'.format(file_name))
-            logging.info('[seada.get_user_information] {} output file created'.format(file_name))
+            logging.info('[TwitterAccount.get_tweets_output] {} output file created'.format(file_name))
 
         if self.args.output == 'csv' or self.args.output == 'all':
             file_name = self.dataset_info['dataset_tweets_file_name'] + '.csv'
+
             for tweet in self.user_tweets:
                 tweet.get_csv_output(file_name=file_name, dataset_directory=self.dataset_info['dataset_directory'])
 
             print('[+] {} output file created'.format(file_name))
-            logging.info('[seada.get_user_information] {} output file created'.format(file_name))
+            logging.info('[TwitterAccount.get_tweets_output] {} output file created'.format(file_name))
 
         if self.args.output == 'database' or self.args.output == 'all':
             for tweet in self.user_tweets:
                 self.db.create_tweet(self.db_connection, tweet.get_tuple_output_without_raw())
 
-            print('[+] database updated with {} tweets.'.format(self.args.tweets_number))
-            logging.info('[seada.get_tweets_output] database updated with {} tweets'.format(self.args.tweets_number))
+            print('[+] Database updated with {} tweets.'.format(len(self.user_tweets)))
+            logging.info('[TwitterAccount.get_tweets_output] database updated with {} '
+                         'tweets'.format(len(self.user_tweets)))
 
     def get_friends_information(self):
         self.timer_friends_info.start()
@@ -130,7 +135,24 @@ class TwitterAccount:
                 friend.get_json_output(file_name=file_name, dataset_directory=self.dataset_info['dataset_directory'])
 
             print('[+] {} output file created'.format(file_name))
-            logging.info('[seada.get_friends_output] JSON output file created')
+            logging.info('[TwitterAccount.get_friends_output] JSON output file created')
+
+        if self.args.output == 'csv' or self.args.output == 'all':
+            file_name = self.dataset_info['dataset_friends_file_name'] + '.csv'
+
+            for friend in self.user_friends:
+                friend.get_csv_output(file_name=file_name, dataset_directory=self.dataset_info['dataset_directory'])
+
+            print('[+] {} output file created'.format(file_name))
+            logging.info('[TwitterAccount.get_friends_output] {} output file created'.format(file_name))
+
+        if self.args.output == 'database' or self.args.output == 'all':
+            for friend in self.user_friends:
+                self.db.create_friend(connection=self.db_connection, friend=friend.get_tuple_output())
+
+            print('[+] Database updated with {} friends.'.format(len(self.user_friends)))
+            logging.info('[TwitterAccount.get_friends_output] database updated with {} '
+                         'friends'.format(len(self.user_friends)))
 
     def get_followers_information(self):
         self.timer_followers_info.start()
@@ -156,7 +178,24 @@ class TwitterAccount:
                 follower.get_json_output(file_name=file_name, dataset_directory=self.dataset_info['dataset_directory'])
 
             print('[+] {} output file created'.format(file_name))
-            logging.info('[seada.get_followers_output] JSON output file created')
+            logging.info('[TwitterAccount.get_followers_output] JSON output file created')
+
+        if self.args.output == 'csv' or self.args.output == 'all':
+            file_name = self.dataset_info['dataset_followers_file_name'] + '.csv'
+
+            for follower in self.user_followers:
+                follower.get_csv_output(file_name=file_name, dataset_directory=self.dataset_info['dataset_directory'])
+
+            print('[+] {} output file created'.format(file_name))
+            logging.info('[TwitterAccount.get_followers_output] cvs output file created')
+
+        if self.args.output == 'database' or self.args.output == 'all':
+            for follower in self.user_followers:
+                self.db.create_follower(self.db_connection, follower.get_tuple_output())
+
+            print('[+] Database updated with {} followers.'.format(len(self.user_followers)))
+            logging.info('[TwitterAccount.get_followers_output] database updated with {} '
+                         'followers'.format(len(self.user_followers)))
 
     def get_favorites_information(self):
         self.timer_favorites_info.start()
@@ -168,8 +207,7 @@ class TwitterAccount:
 
         for favorite in self.user_favorites:
             data = {
-                # TODO change @user_id
-                '@user_id': user.id,
+                'user_id': user.id,
                 'user_name': user.name,
                 'user_screen_name': user.screen_name,
                 'created_at': favorite.favorite.created_at,
@@ -199,4 +237,21 @@ class TwitterAccount:
                 favorite.get_json_output(file_name=file_name, dataset_directory=self.dataset_info['dataset_directory'])
 
             print('[+] {} output file created'.format(file_name))
-            logging.info('[seada.get_favorites_output] JSON output file created')
+            logging.info('[TwitterAccount.get_favorites_output] JSON output file created')
+
+        if self.args.output == 'csv' or self.args.output == 'all':
+            file_name = self.dataset_info['dataset_favorites_file_name'] + '.csv'
+
+            for favorite in self.user_favorites:
+                favorite.get_csv_output(file_name=file_name, dataset_directory=self.dataset_info['dataset_directory'])
+
+            print('[+] {} output file created'.format(file_name))
+            logging.info('[TwitterAccount.get_favorites_output] CSV output file created')
+
+        if self.args.output == 'database' or self.args.output == 'all':
+            for favorite in self.user_favorites:
+                self.db.create_favorites(self.db_connection, favorite.get_tuple_output())
+
+            print('[+] database updated with {} favorites.'.format(len(self.user_favorites)))
+            logging.info('[TwitterAccount.get_favorites_output] database updated with {} '
+                         'favorites'.format(len(self.user_favorites)))
