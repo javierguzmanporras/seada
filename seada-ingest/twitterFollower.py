@@ -12,7 +12,8 @@ class TwitterFollowers(OutputInterface):
         self.follower_id = follower_id
 
     def get_csv_output(self, file_name: str, dataset_directory: str):
-        pass
+        item = self.get_tuple_output()
+        OutputUtilities.get_csv_output(file_name=file_name, dataset_directory=dataset_directory, item=item)
 
     def get_json_output(self, file_name: str, dataset_directory: str):
         """
@@ -25,5 +26,5 @@ class TwitterFollowers(OutputInterface):
                                         item=item, datatag='followers_list')
 
     def get_tuple_output(self) -> tuple:
-        pass
-
+        tuple_follower = (self.follower_id, self.user_id)
+        return tuple_follower
