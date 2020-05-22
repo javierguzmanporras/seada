@@ -12,13 +12,7 @@ import yaml
 from Alert import *
 from Sender import *
 
-#from elasticsearchHandler import ElasticSearchUtils
-#from ..seadaIngest.elasticsearchHandler import ElasticSearchUtils
-
-from ..seadaIngest.timer import Timer
-
-
-
+from seadaIngest.timer import Timer
 
 __version__ = 0.1
 
