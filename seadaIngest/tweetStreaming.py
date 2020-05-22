@@ -8,21 +8,27 @@ from twitterTweet import Tweet
 
 class TweetStreaming:
 
-    def __init__(self):
-        pass
+    def __init__(self, api, track_list, dataset_db, dataset_db_connection, dataset_directory,
+                 elasticseach=True, dataset=False):
+        self.api = api
+        self.track_list = track_list
+        self.elasticsearch = elasticseach
+        self.dataset = dataset
+        self.dataset_db = dataset_db
+        self.dataset_db_connection = dataset_db_connection
+        self.dataset_directory = dataset_directory
 
-    def start(self, api, track_list, args, db, connection, dataset_directory):
-        my_stream_listener = MyStreamListener(args, db, connection, dataset_directory)
-        my_stream = tweepy.Stream(auth=api.auth, listener=my_stream_listener)
-        my_stream.filter(track=track_list)  # filter to stream all tweets containing the word python
-        # myStream.filter(follow=["2211149702"])  #filter to stream tweets by a specific user
+    def start(self, ):
+        my_stream_listener = MyStreamListener(self.db, self.connection, self.dataset_directory)
+        my_stream = tweepy.Stream(auth=self.api.auth, listener=my_stream_listener)
+        my_stream.filter(track=self.track_list)  # filter to stream all tweets containing the word python
+        # example: myStream.filter(follow=["2211149702"])  #filter to stream tweets by a specific user
 
 
 class MyStreamListener(tweepy.StreamListener):
 
-    def __init__(self, args, db, connection, dataset_directory):
+    def __init__(self, db, connection, dataset_directory):
         super(MyStreamListener, self).__init__()
-        self.args = args
         self.db = db
         self.connection = connection
         self.dataset_directory = dataset_directory

@@ -11,9 +11,12 @@ import sys
 import yaml
 from Alert import *
 from Sender import *
-from elasticsearch import Elasticsearch
-from ElasticsearchUtils__old import *
-from time import sleep
+
+# from /seadaIngest/elasticsearchHandler import ElasticSearchUtils
+from .. seadaIngest.elasticsearchHandler import ElasticSearchUtils
+
+
+
 
 __version__ = 0.1
 
@@ -24,17 +27,17 @@ def banner():
     """
     try:
         program_path = os.path.abspath(os.path.dirname(__file__))
-        path = os.path.join(program_path, "../data/seada-alert-banner.txt")
+        path = os.path.join(program_path, "../data/seadaAlert-banner.txt")
         banner_file = open(path, 'r')
         for line in banner_file.readlines():
             print(line.replace("\n", ""))
         banner_file.close()
     except FileNotFoundError:
-        print('[seada-alert.banner] Error: The banner file not found')
-        logging.warning("[seada-alert.banner] Error: The banner file not found")
+        print('[seadaAlert.banner] Error: The banner file not found')
+        logging.warning("[seadaAlert.banner] Error: The banner file not found")
     except Exception as exception:
-        print(exception)
-        logging.warning(exception)
+        print('[+] Problem with banner')
+        logging.warning('[seadaAlert.banner] Exception at banner: {}'.format(exception))
     
     
 # def test_elastic():
@@ -55,10 +58,10 @@ def send_telegram_message(message):
 
 def parse_args():
     """
-    Method for get the arguments input of seada-ingest program.
+    Method for get the arguments input of seadaAlert tool.
     :return: A Namespace class of argparse.
     """
-    parser = argparse.ArgumentParser(prog='seada-alert.py',
+    parser = argparse.ArgumentParser(prog='seadaAlert.py',
                                      description='Sistema de Extracción y Análisis de Datos de fuentes Abiertas',
                                      epilog='Enjoy! :)')
     parser.add_argument('-c', '--config', type=str, help='Config file in yaml format.')
@@ -69,26 +72,29 @@ def parse_args():
 
 def get_config(file_config):
 
-    with open (file_config) as file:
-        config = yaml.safe_load(file)
+    config = None
 
-    # print(str(type(config)) + ": " + str(config))
+    try:
+        with open(file_config) as file:
+            config = yaml.safe_load(file)
+    except Exception as exception:
+        print('[+] Error with config file.')
+        logging.error('[seadaAlert.get_config] Exception at config file: {}'.format(exception))
+
     return config
 
 
 def config_logging():
-    """
-    Config output logging file.
-    :return:
-    """
+    """Config output logging file."""
     try:
         program_path = os.path.abspath(os.path.dirname(__file__))
-        path = os.path.join(program_path, "../data/seada-alert.log")
+        path = os.path.join(program_path, "../data/seadaAlert.log")
         logging.basicConfig(filename=path, filemode='a', format='%(asctime)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
-        logging.info("seada-alert started!")
+        logging.info("seadaAlert started!")
     except Exception as exception:
-        print(exception)
+        print('[+] Error at create logging file.')
+        logging.critical('[seadaAlert.config_logging] Exception with logging: {}'.format(exception))
         sys.exit(-1)
 
 
@@ -108,13 +114,13 @@ def load_alerts(alerts_folder):
 
 
 def config_elasticsearch(es_host, es_port):
-    _es = None
-    _es = ElasticSearchUtils(es_host=es_host, es_port=es_port)
-    es_connection = _es.connect_elasticsearch()
+    es = None
+    es = ElasticSearchUtils(es_host=es_host, es_port=es_port)
+    es_connection = es.connect_elasticsearch()
     if es_connection:
-        _es.es_connection = es_connection
+        es.es_connection = es_connection
 
-    return _es
+    return es
 
 
 def search(es, alert):
@@ -170,23 +176,50 @@ def main():
     config_logging()
     banner()
 
+    config = None
     if args.config:
         config = get_config(file_config=args.config)
 
-    es = config_elasticsearch(config['es_host'], config['es_port'])
-    n_alerts_loaded, alerts = load_alerts(config['alerts_folder'])
-    print("[seada-alert] " + str(n_alerts_loaded) + " alerts loaded...")
+    # print('dirname: {}'.format(os.path.dirname(__file__)))
+    # print(os.path.dirname(__file__))
+    # print(os.path.abspath(""))
+    # print('abspath: {}'.format(os.path.abspath(os.path.dirname(__file__))))
+    #
+    # print()
+    # print()
 
-    for alert in alerts:
-        print ("[seada-alert] Alert: " + str(alert))
+    seada_alert_path = os.path.abspath("")
+    #print('seada_alert_path: {}'.format(seada_alert_path))
+    #print('os.path: {}'.format(os.path))
+    new_path = os.path.join(seada_alert_path, "../seadaIngest/")
+    #print('new_path: {}'.format(new_path))
+    #print('os.path: {}'.format(os.path))
 
-    while True:
-        for alert in alerts:
-            response = search(es, alert)
-            if response:
-                send_alert(alert, response)
+    # print(sys.path)
+    #sys.path.insert(0, new_path)
+    sys.path.append(new_path)
+    print(sys.path)
 
-        time.sleep(config['sleep_interval'])
+
+    if config:
+        es = config_elasticsearch(config['es_host'], config['es_port'])
+        print('type: {}'.format(type(es)))
+
+
+
+        # n_alerts_loaded, alerts = load_alerts(config['alerts_folder'])
+    #     print("[seadaAlert] " + str(n_alerts_loaded) + " alerts loaded...")
+    #
+    # for alert in alerts:
+    #     print ("[seadaAlert] Alert: " + str(alert))
+    #
+    # while True:
+    #     for alert in alerts:
+    #         response = search(es, alert)
+    #         if response:
+    #             send_alert(alert, response)
+    #
+    #     time.sleep(config['sleep_interval'])
 
 
 if __name__ == '__main__':

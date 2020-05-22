@@ -38,13 +38,13 @@ class Sender:
     def __init__(self):
         pass
         # logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-        # logger = logging.getLogger('seada-alert-bot')
+        # logger = logging.getLogger('seadaAlert-bot')
 
     def sendMessageToBot(self, message):
         # updater = Updater(token=self.token)
         # dispatcher = updater.dispatcher
 
-        logger = logging.getLogger('seada-alert-bot')
+        logger = logging.getLogger('seadaAlert-bot')
         logger.setLevel(logging.INFO)
         handler = RequestsHandler()
         formatter = LogstashFormatter()

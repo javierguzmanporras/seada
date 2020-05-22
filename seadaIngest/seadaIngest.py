@@ -22,7 +22,7 @@ def banner():
     """
     try:
         seada_path = os.path.abspath(os.path.dirname(__file__))
-        path = os.path.join(seada_path, "../data/seada-ingest-banner.txt")
+        path = os.path.join(seada_path, "../data/seadaIngest-banner.txt")
         banner_file = open(path, 'r')
         for line in banner_file.readlines():
             print(line.replace("\n", ""))
@@ -133,7 +133,7 @@ def config_logging():
     """
     try:
         seada_path = os.path.abspath(os.path.dirname(__file__))
-        path = os.path.join(seada_path, "../data/seada-ingest.log")
+        path = os.path.join(seada_path, "../data/seadaIngest.log")
         logging.basicConfig(filename=path, filemode='a', format='%(asctime)s %(levelname)s-%(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
         logging.info("SeadaIngest started!")
@@ -232,8 +232,8 @@ def main():
             twitter_accounts.append(twitter_account)
 
     if args.streaming:
-        ts = TweetStreaming()
-        ts.start(api, args.streaming, args, db, db_connection, dataset_directory)
+        ts = TweetStreaming(api, args.streaming, db, db_connection, dataset_directory)
+        ts.start()
 
     sys.exit(0)
 
