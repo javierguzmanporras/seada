@@ -13,6 +13,7 @@ from seadaIngest.timer import Timer
 from seadaIngest.databaseHandler import Database
 from seadaIngest.tweetStreaming import TweetStreaming
 from seadaIngest.elasticsearchHandler import ElasticSearchUtils
+from seadaAlert.alertHandler import AlertHandler
 
 __version__ = 0.1
 
@@ -161,33 +162,25 @@ def config_elasticsearch(es_host, es_port):
     return _es
 
 
-def main():
-    args = parse_args()
-    config_logging()
-    banner(args.feature)
+def alert_tool(config_dir, es_connection):
+    alert_handler = AlertHandler(config_dir=config_dir, es_connection=es_connection)
+    alert_handler.start()
 
-    # if args.feature:
-    #     import seadaAlert
-    #     seadaAlert.main()
 
-    if args.debug:
-        print('[+] ' + str(vars(args)) + '\n')
-        logging.info('[main] {}'.format(vars(args)))
+def ingest_tool(args, es):
+    db = None
+    db_connection = None
 
     dataset_directory = database_directory = args.output_folder
     dataset_suffix = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
     database_name = 'dataset_database_{}.db'.format(dataset_suffix)
     database_path = database_directory + '/' + database_name
-
     config_dataset_output(dataset_directory)
-    db = None
-    db_connection = None
+
     if args.output == 'database' or args.output == 'all':
         db, db_connection = config_database(database_path)
 
-    es = config_elasticsearch('localhost', '9200')
     api = config_twitter_api()
-
     dataset_info = {
         'dataset_directory': dataset_directory,
         'dataset_users_file_name': 'dataset_users_{}'.format(dataset_suffix),
@@ -246,6 +239,26 @@ def main():
     if args.streaming:
         ts = TweetStreaming(api, args.streaming, db, db_connection, dataset_directory)
         ts.start()
+
+
+def main():
+    args = parse_args()
+    config_logging()
+    banner(args.feature)
+
+    if args.debug:
+        print('[+] ' + str(vars(args)) + '\n')
+        logging.info('[main] {}'.format(vars(args)))
+
+    # Elasticsearch connection
+    es = config_elasticsearch('localhost', '9200')
+
+    if args.feature == 'alert':
+        alert_tool(config_dir=args.config, es_connection=es)
+    elif args.feature == 'ingest':
+        ingest_tool(args=args, es=es)
+    else:
+        print('[+] Nothing to do...')
 
     sys.exit(0)
 
