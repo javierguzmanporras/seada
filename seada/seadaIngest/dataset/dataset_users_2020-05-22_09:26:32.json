@@ -1,0 +1,46 @@
+{
+    "user_list": [
+        {
+            "id": 953305718966366209,
+            "name": "GrimoireLab",
+            "screen_name": "GrimoireLab",
+            "location": "",
+            "description": "GrimoireLab: toolset for software development analytics (a CHAOSS project)",
+            "url": "https://t.co/zvL1hwomUw",
+            "protected": false,
+            "followers_count": 250,
+            "friends_count": 2,
+            "listed_count": 5,
+            "created_at": "2018-01-16 16:39:29",
+            "favourites_count": 79,
+            "geo_enabled": false,
+            "verified": false,
+            "statuses_count": 281,
+            "profile_image_url_https": "https://pbs.twimg.com/profile_images/956229083100270595/6pL7cjIh_normal.jpg",
+            "default_profile": true,
+            "default_profile_image": false,
+            "profile_banner_url": "https://pbs.twimg.com/profile_banners/953305718966366209/1516128490"
+        },
+        {
+            "id": 302314949,
+            "name": "Jesús M González Barahona (ES)",
+            "screen_name": "jgbarah2",
+            "location": "",
+            "description": "Yo soy yo, mis circunstancias, y mi conexión a Internet.\n\nI also tweet (mainly) in English as @jgbarah",
+            "url": "https://t.co/0kqtVmaTGn",
+            "protected": false,
+            "followers_count": 306,
+            "friends_count": 92,
+            "listed_count": 7,
+            "created_at": "2011-05-21 00:02:49",
+            "favourites_count": 445,
+            "geo_enabled": false,
+            "verified": false,
+            "statuses_count": 740,
+            "profile_image_url_https": "https://pbs.twimg.com/profile_images/1362647927/jgb-2002-bw_normal.jpg",
+            "default_profile": false,
+            "default_profile_image": false,
+            "profile_banner_url": ""
+        }
+    ]
+}
