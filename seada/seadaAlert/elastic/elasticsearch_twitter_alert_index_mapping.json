@@ -1,0 +1,21 @@
+{
+  "settings": {
+    "number_of_shards": "1",
+    "number_of_replicas":"2"
+  },
+  "mappings": {
+    "properties": {
+      "@timestamp": { "type":  "date" },
+      "alert_name": { "type":  "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "alert_type": { "type":  "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "alert_terms": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "alert_outputs": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "alert_content_username": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "alert_content_text": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "alert_content_id": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "alert_content_created_at": { "type":  "date" },
+      "alert_content_hashtags": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}},
+      "alert_content_user_mentions": { "type": "text", "fields":{"keyword":{"type":"keyword","ignore_above":256}}}
+    }
+  }
+}
