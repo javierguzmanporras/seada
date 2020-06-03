@@ -2,11 +2,11 @@
 
 # Folder that contains the alarm's rule yaml files
 # Any .yaml file will be loaded as a rule
-alerts_folder: alerts
+alerts_folder: seadaAlert/alerts
 
 # Sleep interval time between search process in seconds
 #sleep_interval: 300 #seconds
-sleep_interval: 60 #seconds
+sleep_interval: 900 #seconds
 
 # ElasticSearch config
 es_host: localhost
