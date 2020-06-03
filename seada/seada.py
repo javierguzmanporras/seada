@@ -11,7 +11,7 @@ import tweepy
 from seadaIngest.twitterAccount import TwitterAccount
 from seadaIngest.timer import Timer
 from seadaIngest.databaseHandler import Database
-from seadaIngest.tweetStreaming import TweetStreaming
+from seadaIngest.tweetStream import TweetStream
 from seadaIngest.elasticsearchHandler import ElasticSearchUtils
 from seadaAlert.alertHandler import AlertHandler
 
@@ -20,11 +20,14 @@ __version__ = 0.1
 
 def banner(tool):
     """
-    Print a banner when the program starts
+    Prints a banner when the program starts
+    :param tool: type of tool
     """
     try:
         if tool == 'ingest':
             banner_file = open('../data/seada-ingest-banner.txt', 'r')
+        elif tool == 'streaming':
+            banner_file = open('../data/seada-streaming-banner.txt', 'r')
         else:
             banner_file = open('../data/seada-alert-banner.txt', 'r')
 
@@ -42,14 +45,14 @@ def banner(tool):
 
 def parse_args():
     """
-    Method for get the arguments input of seadaIngest tool.
+    Method for get the arguments input of seada tool.
     :return: A Namespace class of argparse.
     """
     parser = argparse.ArgumentParser(prog='seada.py',
                                      description='Sistema de Extracción y Análisis de Datos de fuentes Abiertas',
                                      epilog='Enjoy! :)')
 
-    parser.add_argument('-f', '--feature', choices=['ingest', 'alert'], default='None', required=True,
+    parser.add_argument('-f', '--feature', choices=['ingest', 'alert', 'streaming'], default='None', required=True,
                         help='Type of feature, ingest information tool or alert tool')
 
     parser.add_argument('-c', '--config', type=str, help='Config file in yaml format for alert feature.')
@@ -59,9 +62,9 @@ def parse_args():
     group.add_argument('-a', '--account', metavar='ACCOUNT', type=str, help='User twitter account')
 
     group.add_argument('-al', '--account_list', metavar='ACCOUNT-LIST', type=str, nargs='+',
-                       help='User list twitter account')
+                       help='User terms_list twitter account')
 
-    group.add_argument('-s', '--streaming', type=str, nargs='+', help='Download twitter messages in real time.')
+    group.add_argument('-sl', '--streaming_list', type=str, nargs='+', help='Download twitter messages in real time.')
 
     parser.add_argument('-n', '--tweets_number', default=100, type=int,
                         help='Number of tweets that will get from user. Default=100.')
@@ -83,7 +86,7 @@ def config_twitter_api():
     """
     Method for get access keys of twitter from environment variables, create the authentication object and
     create the instance of API class.
-    :return: Instance of "API" class of tweepy
+    :return: Instance of "API" class of Tweepy
     """
     try:
         consumer_key = os.environ['CONSUMER_KEY']
@@ -153,6 +156,12 @@ def config_logging():
 
 
 def config_elasticsearch(es_host, es_port):
+    """
+    Create a elasticsearch connection
+    :param es_host: Name or IP address of the elasticsearch server. By default: localhost
+    :param es_port: Port of elasticsearch server. By default: 9200
+    :return: A instance of ElasticSearchUtils class with a elasticsearch connection.
+    """
     _es = None
     _es = ElasticSearchUtils(es_host=es_host, es_port=es_port)
     es_connection = _es.connect_elasticsearch()
@@ -162,12 +171,28 @@ def config_elasticsearch(es_host, es_port):
     return _es
 
 
-def alert_tool(config_dir, es_connection):
-    alert_handler = AlertHandler(config_dir=config_dir, es_connection=es_connection)
+def alert_tool(config_dir, es_connection, debug):
+    """
+    Method for alert tool.
+    :param config_dir: location of config yaml file
+    :param es_connection: instance with elasticsearch connection
+    :param debug: it indicate if seada is in debug mode
+    :return:
+    """
+    alert_handler = AlertHandler(config_dir=config_dir, es_connection=es_connection, debug=debug)
     alert_handler.start()
 
 
-def ingest_tool(args, es):
+def ingest_tool(args, es, api):
+    """
+    Method for ingest tool.
+    :param args: A Namespace class of argparse.
+    :param es: instance with elasticsearch connection
+    :param api: instance of Tweepy class with connection with Twitter API
+    :return:
+    """
+    #TODO dataset_config method for set vars out from ingest_tool
+
     db = None
     db_connection = None
 
@@ -180,7 +205,6 @@ def ingest_tool(args, es):
     if args.output == 'database' or args.output == 'all':
         db, db_connection = config_database(database_path)
 
-    api = config_twitter_api()
     dataset_info = {
         'dataset_directory': dataset_directory,
         'dataset_users_file_name': 'dataset_users_{}'.format(dataset_suffix),
@@ -212,10 +236,10 @@ def ingest_tool(args, es):
             user=args.account,
             time=Timer.timers['tweets_info']))
 
-        print('[+] Download {user} friend list in {time} secods'.format(user=args.account,
+        print('[+] Download {user} friend terms_list in {time} secods'.format(user=args.account,
                                                                         time=Timer.timers['friends_info']))
 
-        print('[+] Download {} follower list in {} seconds'.format(args.account, Timer.timers['followers_info']))
+        print('[+] Download {} follower terms_list in {} seconds'.format(args.account, Timer.timers['followers_info']))
         print('[+] Download {} favorites in {} seconds'.format(args.account, Timer.timers['favorites_info']))
 
     if args.account_list:
@@ -236,9 +260,20 @@ def ingest_tool(args, es):
 
             twitter_accounts.append(twitter_account)
 
-    if args.streaming:
-        ts = TweetStreaming(api, args.streaming, db, db_connection, dataset_directory)
-        ts.start()
+
+def streaming_tool(api, track_list, dataset_db, dataset_db_connection, dataset_directory, elasticseach):
+    """
+    Method for streaming tool
+    :param api: instance of Tweepy class with connection with Twitter API
+    :param track_list: list of terms for the streaming
+    :param dataset_db:
+    :param dataset_db_connection:
+    :param dataset_directory:
+    :param elasticseach: instance with elasticsearch connection
+    :return:
+    """
+    ts = TweetStream(api, track_list, dataset_db, dataset_db_connection, dataset_directory, elasticseach)
+    ts.start()
 
 
 def main():
@@ -253,10 +288,15 @@ def main():
     # Elasticsearch connection
     es = config_elasticsearch('localhost', '9200')
 
+    # Twitter API connection
+    api = config_twitter_api()
+
     if args.feature == 'alert':
-        alert_tool(config_dir=args.config, es_connection=es)
+        alert_tool(config_dir=args.config, es_connection=es, debug=args.debug)
     elif args.feature == 'ingest':
-        ingest_tool(args=args, es=es)
+        ingest_tool(args=args, es=es, api=api)
+    elif args.feature == 'streaming':
+        streaming_tool(api, args.streaming_list, None, None, None, es)
     else:
         print('[+] Nothing to do...')
 
