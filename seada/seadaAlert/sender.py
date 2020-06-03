@@ -10,6 +10,7 @@ import requests
 token = '1262332778:AAH5EDRl25ZpHS5NoLKytiI7Bieg-YWrdjg'
 chat_id = '366665070'
 
+
 class RequestsHandler(Handler):
     def emit(self, record):
         log_entry = self.format(record)
