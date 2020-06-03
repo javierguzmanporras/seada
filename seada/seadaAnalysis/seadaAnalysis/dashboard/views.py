@@ -590,7 +590,7 @@ def __get_bar_data(user, labels):
     data = []
 
     """
-    Complex code for build a list of 7 dates for 7 days.
+    Complex code for build a terms_list of 7 dates for 7 days.
     obtengo el bucket.
     - si la fecha del bucket coincide con la fecha de las etiquetas, añado el dato a la lista y aumento el indice
     de los buckets.
