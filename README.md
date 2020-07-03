@@ -9,63 +9,83 @@
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
-### Prerequisites
-
-What things you need to install the software and how to install them
-
-```
-Give examples
-```
-
 ### Installing
 
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
+A step by step how to get a development env running:
 
 ```
-Give the example
+git clone https://github.com/javierguzmanporras/project-seada
+cd project-seada
+pip3 install -r requirements.txt
+python3 -m textblob.download_corpora
 ```
 
-And repeat
+We need add twitter development keys to environmnet variables
+```
+export CONSUMER_KEY=XXXXXXXXXXXXXXXXXXXXXXXXX
+export CONSUMER_SECRET=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+export ACCESS_TOKEN=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+export ACCESS_TOKEN_SECRET=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+```
+
+Test SEADA program
+```
+cd seada
+python3 seada.py -h
+```
+
+Demo:
+
+
+### Installing Docker
+Install Docker
+```
+wget https://get.docker.com -O get-docker.sh
+bash get-docker.sh
+```
+
+Verify that you can run docker commands without sudo.
+```
+docker run hello-world
+```
+
+Install docker-compose
+```
+curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+``` 
+
+Config Docker
+
+Set vm.max_map_count to at least 262144
 
 ```
-until finished
+set or change vm.max_map_count=262144 in /etc/sysctl.conf
+sysctl -p
 ```
 
-End with an example of getting some data out of the system or using it for a little demo
 
 ## Deployment
 
-Add additional notes about how to deploy this on a live system
+You can deploy with Docker:
+
+* [javierguzmanporras/seada:v1](https://hub.docker.com/repository/docker/javierguzmanporras/seada)
+* [javierguzmanporras/seada-analysis:v1](https://hub.docker.com/repository/docker/javierguzmanporras/seada-analysis)
 
 ## Built With
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+* [Python](https://github.com/python) - The programming language used
+* [Tweepy](https://github.com/tweepy/tweepy) - Used to Twitter API
+* [Django](https://github.com/django/django) - The web application framework used
+* [Elasticsearch](https://github.com/elastic/elasticsearch) - Used to database
+* [Kibana](https://github.com/elastic/kibana) - Browser-based analytics and search dashboard for Elasticsearch
 
-## Contributing
 
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+## Author
 
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
-
-## Authors
-
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+* **Javier Guzmán Porras** - [OctarineHat](https://github.com/javierguzmanporras)
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
+This project is licensed under the MIT License.
 
