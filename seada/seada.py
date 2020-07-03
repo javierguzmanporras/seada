@@ -25,11 +25,11 @@ def banner(tool):
     """
     try:
         if tool == 'ingest':
-            banner_file = open('../data/seada-ingest-banner.txt', 'r')
+            banner_file = open('data/seada-ingest-banner.txt', 'r')
         elif tool == 'streaming':
-            banner_file = open('../data/seada-streaming-banner.txt', 'r')
+            banner_file = open('data/seada-streaming-banner.txt', 'r')
         else:
-            banner_file = open('../data/seada-alert-banner.txt', 'r')
+            banner_file = open('data/seada-alert-banner.txt', 'r')
 
         for line in banner_file.readlines():
             print(line.replace("\n", ""))
@@ -286,16 +286,16 @@ def main():
         logging.info('[main] {}'.format(vars(args)))
 
     # Elasticsearch connection
-    es = config_elasticsearch('localhost', '9200')
-
-    # Twitter API connection
-    api = config_twitter_api()
+    # es = config_elasticsearch('localhost', '9200')
+    es = config_elasticsearch('127.0.0.1', '9200')
 
     if args.feature == 'alert':
         alert_tool(config_dir=args.config, es_connection=es, debug=args.debug)
     elif args.feature == 'ingest':
+        api = config_twitter_api()  # Twitter API connection
         ingest_tool(args=args, es=es, api=api)
     elif args.feature == 'streaming':
+        api = config_twitter_api()  # Twitter API connection
         streaming_tool(api, args.streaming_list, None, None, None, es)
     else:
         print('[+] Nothing to do...')

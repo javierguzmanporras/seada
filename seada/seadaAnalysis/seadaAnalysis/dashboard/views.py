@@ -1,10 +1,15 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from elasticsearchHandler import ElasticSearchUtils
 from datetime import datetime, timedelta
 from textblob import TextBlob
+from .elasticsearchHandler import ElasticSearchUtils
 
-import timer
+import matplotlib.pyplot as plt
+import numpy as np
+from datetime import datetime
+import io
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+from django.http import HttpResponse
 
 
 def get_num_users_protected_and_verified():
@@ -99,14 +104,15 @@ def dashboard(request):
     return render(request, template, context)
 
 
-def __get_user_list():
+def get_user_list():
 
     query = {
+      "size": 100,
       "query": {
         "match_all": {}
       },
       "_source": {
-        "includes": [ "name", "screen_name"]
+        "includes": ["name", "screen_name"]
       }
     }
 
@@ -120,9 +126,7 @@ def __get_user_list():
     if response:
         total = response['hits']['total']['value']
         for hit in response['hits']['hits']:
-            user_list_field = []
-            user_list_field.append(hit['_source']['name'])
-            user_list_field.append(hit['_source']['screen_name'])
+            user_list_field = [hit['_source']['name'], hit['_source']['screen_name']]
             __user_list.append(user_list_field)
 
     return __user_list
@@ -130,11 +134,11 @@ def __get_user_list():
 
 def user_list(request):
 
-    __user_list = __get_user_list()
+    __user_list = get_user_list()
 
     template = 'dashboard/userlist.html'
     context = {
-        'title': 'Django chart.js',
+        'title': 'Compare User List',
         'user_list': __user_list
     }
     return render(request, template, context)
@@ -142,17 +146,42 @@ def user_list(request):
 
 def compare_users(request):
 
-    __user_list = False
+    __user_list = []
+    chart_type = ""
 
     if request.POST:
-        __user_list = request.POST.getlist('usercheck', False)
+        print(request.POST)
+
+        if 'usercheck' in request.POST:
+            __user_list = request.POST.getlist('usercheck', False)
+
+        if 'u1' in request.POST:
+            __user_list.append(request.POST.get('u1', False))
+            __user_list.append(request.POST.get('u2', False))
+
+        chart_type = 'compare/week/{}/{}/'.format(__user_list[0], __user_list[1])
+        size = "600px"
+        day = request.POST.get('day', False)
+        day_hour = request.POST.get('day_hour', False)
+
+        print('[compare_users] day: {}'.format(day))
+        print('[compare_users] hour: {}'.format(day_hour))
+
+        if day:
+            chart_type = 'compare/day/{}/{}/{}/'.format(day, __user_list[0], __user_list[1])
+
+        if day_hour:
+            chart_type = 'compare/hour/{}/{}/{}/'.format(day_hour, __user_list[0], __user_list[1])
+            size = "1200px"
 
     if __user_list and (len(__user_list) > 1):
         template = 'dashboard/compare_users.html'
         context = {
-            'title': 'Django chart.js',
+            'title': 'Compare Users',
             'user1': __user_list[0],
-            'user2': __user_list[1]
+            'user2': __user_list[1],
+            'chart_type': chart_type,
+            'size': size
         }
     else:
         template = 'dashboard/error.html'
@@ -171,7 +200,6 @@ def test(request):
         'title': 'Django chart.js'
     }
     return render(request, template, context)
-
 
 
 def config_elasticsearch(es_host, es_port):
@@ -215,7 +243,6 @@ def get_time_line_data(request):
     :param request:
     :return:
     """
-
     query = {
       "query": {
         "bool": {
@@ -280,11 +307,6 @@ def get_time_line_data(request):
 
 
 def get_time_line_data_v2(request, user):
-    """
-
-    :param request:
-    :return:
-    """
     query = {
         "size": 20,
         "query": {
@@ -326,7 +348,7 @@ def get_time_line_data_v2(request, user):
         }
       ],
       "_source": {
-        "includes": [ "id", "user_screen_name", "created_at", "text"]
+        "includes": ["id", "user_screen_name", "created_at", "text"]
       }
     }
 
@@ -346,91 +368,284 @@ def get_time_line_data_v2(request, user):
                 'description': hit['_source']['created_at'] + "\n" + hit['_source']['text'],
                 'name': hit['_source']['user_screen_name'],
                 'label': hit['_source']['user_screen_name'],
-                # 'dataLabels': {
-                #                 'color': '#78f',
-                #                 'borderColor': 'blue',
-                #                 'backgroundColor': '#444',
-                #                 'style': {'textOutline': 0}
-                # }
             }
             data.append(item)
 
     return JsonResponse(data, safe=False)
 
 
+def get_compare_week(request, user1, user2):
+    labels = []
+    for day in reversed(range(7)):
+        labels.append(str((datetime.now() - timedelta(days=day)).date()))
 
-import matplotlib.pyplot as plt
-import numpy as np
-import matplotlib.dates as mdates
-from datetime import datetime
-import io
-from matplotlib.backends.backend_agg import FigureCanvasAgg
-from django.http import HttpResponse
+    u1_days = __get_bar_data(user=user1, labels=labels)
+    u2_days = __get_bar_data(user=user2, labels=labels)
 
-def get_time_line_mat(request):
+    x = np.arange(len(labels))  # the label locations
+    width = 0.35  # the width of the bars
 
-    names, dates = get_time_line_data(None)
+    fig, ax = plt.subplots()
+    fig.set_dpi = 1200.0
+    rects1 = ax.bar(x - width / 2, u1_days, width, label=user1)
+    rects2 = ax.bar(x + width / 2, u2_days, width, label=user2)
 
-    # names = ['v2.2.4', 'v3.0.3', 'v3.0.2', 'v3.0.1', 'v3.0.0', 'v2.2.3',
-    #          'v2.2.2', 'v2.2.1', 'v2.2.0', 'v2.1.2', 'v2.1.1', 'v2.1.0',
-    #          'v2.0.2', 'v2.0.1', 'v2.0.0', 'v1.5.3', 'v1.5.2', 'v1.5.1',
-    #          'v1.5.0', 'v1.4.3', 'v1.4.2', 'v1.4.1', 'v1.4.0']
+    # Add some text for labels, title and custom x-axis tick labels, etc.
+    ax.set_ylabel('# Tweets and Retweets')
+    ax.set_xlabel('Days')
+    ax.set_title('Tweet and Retweet compare for {} and {}'.format(user1, user2))
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+    fig.autofmt_xdate()
+    ax.legend()
 
-    # dates = ['2019-02-26', '2019-02-26', '2018-11-10', '2018-11-10',
-    #          '2018-09-18', '2018-08-10', '2018-03-17', '2018-03-16',
-    #          '2018-03-06', '2018-01-18', '2017-12-10', '2017-10-07',
-    #          '2017-05-10', '2017-05-02', '2017-01-17', '2016-09-09',
-    #          '2016-07-03', '2016-01-10', '2015-10-29', '2015-02-16',
-    #          '2014-10-26', '2014-10-18', '2014-08-26']
+    def autolabel(rects):
+        """Attach a text label above each bar in *rects*, displaying its height."""
+        for rect in rects:
+            height = rect.get_height()
+            if height != 0:
+                ax.annotate('{}'.format(height),
+                            xy=(rect.get_x() + rect.get_width() / 2, height),
+                            xytext=(0, 3),  # 3 points vertical offset
+                            textcoords="offset points",
+                            ha='center', va='bottom')
 
-    #dates = [datetime.strptime(d, "%Y-%m-%d") for d in dates]
-    dates = [datetime.strptime(d, "%Y-%m-%d %H:%M:%S") for d in dates]
+    autolabel(rects1)
+    autolabel(rects2)
+    fig.tight_layout()
+    #plt.show()
 
-    # Choose some nice levels
-    #levels = np.tile([-5, 5, -3, 3, -1, 1], int(np.ceil(len(dates) / 6)))[:len(dates)]
+    # Como enviaremos la imagen en bytes la guardaremos en un buffer
+    buf = io.BytesIO()
+    canvas = FigureCanvasAgg(fig)
+    canvas.print_png(buf)
 
-    levels = []
-    for d in names:
-        if d == "T":
-            levels.append(1)
+    # Creamos la respuesta enviando los bytes en tipo imagen png
+    response = HttpResponse(buf.getvalue(), content_type='image/png')
+
+    # Limpiamos la figura para liberar memoria
+    fig.clear()
+
+    # Añadimos la cabecera de longitud de fichero para más estabilidad
+    response['Content-Length'] = str(len(response.content))
+
+    # Devolvemos la response
+    return response
+
+
+def get_compare_day_data(user, day, label_hours):
+    query = {
+        "size": 0,
+        "query": {
+            "bool": {
+                "should": [
+                    {"match": {"user_screen_name": user}}
+                ],
+                "minimum_should_match": 1,
+                "filter": [{
+                    "range": {
+                        "created_at": {
+                            "gte": day,
+                            "lte": day
+                        }
+                    }
+                }]
+            }
+        },
+        "aggs": {
+            "test": {
+                "date_histogram": {
+                    "field": "created_at",
+                    "calendar_interval": "hour"
+                }
+            }
+        }
+    }
+
+    es_host = "127.0.0.1"
+    es_port = "9200"
+    index = 'twitter_tweets'
+    es = config_elasticsearch(es_host=es_host, es_port=es_port)
+    response = search(es=es, index=index, query=query)
+    data = []
+
+    if response:
+        if response['hits']['total']['value'] > 0:
+            buckets_index = 0
+            for x in range(24):
+                bucket = response['aggregations']['test']['buckets'][buckets_index]
+                if (bucket['key_as_string'].split('T')[1]).split(':')[0] == label_hours[x]:
+                    data.append(bucket['doc_count'])
+                    if buckets_index < (len(response['aggregations']['test']['buckets']) - 1):
+                        buckets_index = buckets_index + 1
+                else:
+                    data.append(0)
         else:
-            levels.append(2)
+            data = np.zeros(24, dtype=int)
 
-    levels = np.asarray(levels)
+    print('data: {}'.format(data))
+    return data
 
-    # Create figure and plot a stem plot with the date
-    fig, ax = plt.subplots(figsize=(8.8, 4), constrained_layout=True)
-    ax.set(title="Tweets user 1")
 
-    markerline, stemline, baseline = ax.stem(dates, levels,
-                                             linefmt="C3-",
-                                             basefmt="k-",
-                                             use_line_collection=True)
+def get_compare_day(day, user1, user2):
 
-    plt.setp(markerline, mec="k", mfc="w", zorder=3)
+    label_hours = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16',
+                   '17', '18', '19', '20', '21', '22', '23']
 
-    # Shift the markers to the baseline by replacing the y-data by zeros.
-    markerline.set_ydata(np.zeros(len(dates)))
+    u1_data = get_compare_day_data(user1, day, label_hours)
+    u2_data = get_compare_day_data(user2, day, label_hours)
 
-    # annotate lines
-    vert = np.array(['top', 'bottom'])[(levels > 0).astype(int)]
-    for d, l, r, va in zip(dates, levels, names, vert):
-        ax.annotate(r, xy=(d, l), xytext=(-3, np.sign(l) * 3),
-                    textcoords="offset points", va=va, ha="right")
+    x = np.arange(len(label_hours))  # the label locations
+    width = 0.35  # the width of the bars
 
-    # format xaxis with 4 month intervals
-    # ax.get_xaxis().set_major_locator(mdates.MonthLocator(interval=4))
-    ax.get_xaxis().set_major_locator(mdates.HourLocator(interval=4))
-    # ax.get_xaxis().set_major_formatter(mdates.DateFormatter("%b %Y"))
-    ax.get_xaxis().set_major_formatter(mdates.DateFormatter("%d %b %Y"))
-    plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
+    fig, ax = plt.subplots()
+    fig.set_dpi = 1200.0
+    rects1 = ax.bar(x - width / 2, u1_data, width, label=user1)
+    rects2 = ax.bar(x + width / 2, u2_data, width, label=user2)
 
-    # remove y axis and spines
-    ax.get_yaxis().set_visible(False)
-    for spine in ["left", "top", "right"]:
-        ax.spines[spine].set_visible(False)
+    # Add some text for labels, title and custom x-axis tick labels, etc.
+    ax.set_ylabel('# Tweets and Retweets')
+    ax.set_xlabel('Hours')
+    ax.set_title('Tweet and Retweet compare for {} and {}'.format(user1, user2))
+    ax.set_xticks(x)
+    ax.set_xticklabels(label_hours)
+    ax.legend()
 
-    ax.margins(y=0.1)
+    def autolabel(rects):
+        """Attach a text label above each bar in *rects*, displaying its height."""
+        for rect in rects:
+            height = rect.get_height()
+            if height != 0:
+                ax.annotate('{}'.format(height),
+                            xy=(rect.get_x() + rect.get_width() / 2, height),
+                            xytext=(0, 3),  # 3 points vertical offset
+                            textcoords="offset points",
+                            ha='center', va='bottom')
+
+    autolabel(rects1)
+    autolabel(rects2)
+    fig.tight_layout()
+    #plt.show()
+
+    # Como enviaremos la imagen en bytes la guardaremos en un buffer
+    buf = io.BytesIO()
+    canvas = FigureCanvasAgg(fig)
+    canvas.print_png(buf)
+
+    # Creamos la respuesta enviando los bytes en tipo imagen png
+    response = HttpResponse(buf.getvalue(), content_type='image/png')
+
+    # Limpiamos la figura para liberar memoria
+    fig.clear()
+
+    # Añadimos la cabecera de longitud de fichero para más estabilidad
+    response['Content-Length'] = str(len(response.content))
+
+    # Devolvemos la response
+    return response
+
+
+def get_compare_hour_data(hour, hour_before, user, label_seconds):
+    query = {
+      "size": 0,
+      "query": {
+        "bool": {
+          "should": [
+            {"match": {"user_screen_name": user}}
+          ],
+          "minimum_should_match": 1,
+          "filter": [{
+            "range": {
+              "created_at": {
+                "gte": hour,
+                "lte": hour_before
+              }
+            }
+          }]
+        }
+      },
+      "aggs": {
+        "test": {
+          "date_histogram": {
+            "field": "created_at",
+            "calendar_interval": "minute"
+          }
+        }
+      }
+    }
+
+    es_host = "127.0.0.1"
+    es_port = "9200"
+    index = 'twitter_tweets'
+    es = config_elasticsearch(es_host=es_host, es_port=es_port)
+    response = search(es=es, index=index, query=query)
+    data = []
+
+    print(response)
+
+    if response:
+        if response['hits']['total']['value'] > 0:
+            buckets_index = 0
+            for x in range(60):
+                bucket = response['aggregations']['test']['buckets'][buckets_index]
+                if (bucket['key_as_string'].split('T')[1]).split(':')[1] == label_seconds[x]:
+                    data.append(bucket['doc_count'])
+                    if buckets_index < (len(response['aggregations']['test']['buckets']) - 1):
+                        buckets_index = buckets_index + 1
+                else:
+                    data.append(0)
+        else:
+            data = np.zeros(60, dtype=int)
+
+    print('data: {}'.format(data))
+    return data
+
+
+def get_compare_hour(hour, user1, user2):
+
+    label_hours = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09',
+                   '10', '11', '12', '13', '14', '15', '16', '17', '18', '19',
+                   '20', '21', '22', '23', '24', '25', '26', '27', '28', '29',
+                   '30', '31', '32', '33', '34', '35', '36', '37', '38', '39',
+                   '40', '41', '42', '43', '44', '45', '46', '47', '48', '49',
+                   '50', '51', '52', '53', '54', '55', '56', '57', '58', '59']
+
+    hour_before = datetime.strptime(hour, '%Y-%m-%dT%H:%M') + timedelta(hours=1)
+    hour_before = hour_before.strftime('%Y-%m-%dT%H:%M')
+    u1_hour = get_compare_hour_data(hour, hour_before, user1, label_hours)
+    u2_hour = get_compare_hour_data(hour, hour_before, user2, label_hours)
+
+    x = np.arange(len(label_hours))  # the label locations
+    width = 0.35  # the width of the bars
+
+    fig, ax = plt.subplots()
+    fig.set_size_inches(14, 5)
+    fig.set_dpi = 1200.0
+    rects1 = ax.bar(x - width / 2, u1_hour, width, label=user1)
+    rects2 = ax.bar(x + width / 2, u2_hour, width, label=user2)
+
+    # Add some text for labels, title and custom x-axis tick labels, etc.
+    ax.set_ylabel('# Tweets and Retweets')
+    ax.set_xlabel('Minutes')
+    ax.set_title('Tweet and Retweet compare for {} and {}'.format(user1, user2))
+    ax.set_xticks(x)
+    ax.set_xticklabels(label_hours)
+    ax.legend()
+
+    def autolabel(rects):
+        """Attach a text label above each bar in *rects*, displaying its height."""
+        for rect in rects:
+            height = rect.get_height()
+            if height != 0:
+                ax.annotate('{}'.format(height),
+                            xy=(rect.get_x() + rect.get_width() / 2, height),
+                            xytext=(0, 3),  # 3 points vertical offset
+                            textcoords="offset points",
+                            ha='center', va='bottom')
+
+    autolabel(rects1)
+    autolabel(rects2)
+    fig.tight_layout()
     #plt.show()
 
     # Como enviaremos la imagen en bytes la guardaremos en un buffer
@@ -452,12 +667,6 @@ def get_time_line_mat(request):
 
 
 def __get_network_data(user1, user2, today, before):
-
-    print(user1)
-    print(user2)
-    print(today)
-    print(before)
-
     query = {
       "size": 1000,
       "query": {
@@ -503,12 +712,10 @@ def __get_network_data(user1, user2, today, before):
     es = config_elasticsearch(es_host=es_host, es_port=es_port)
     response = search(es=es, index=index, query=query)
 
-    print(response)
-
     return response['hits']['total']['value']
 
 
-def get_network_data(request, user1, user2):
+def get_network_data(user1, user2):
 
     today = str(datetime.now().date())
     before = str((datetime.now() - timedelta(days=14)).date())
@@ -518,9 +725,6 @@ def get_network_data(request, user1, user2):
 
     id1 = str(user1) + "," + str(info_u1) + "RT"
     id2 = str(user2) + "," + str(info_u2) + "RT"
-
-    print(id1)
-    print(id2)
 
     data = {
         "nodes": [
@@ -532,22 +736,6 @@ def get_network_data(request, user1, user2):
             {"source": id2, "target": id1, "value": 0.5},
         ]
     }
-
-    # data = {
-    #     "nodes": [
-    #         {"id": "Microsoft", "group": 1},
-    #         {"id": "Apple", "group": 2},
-    #         {"id": "hp", "group": 2},
-    #         {"id": "logitech", "group": 3},
-    #     ],
-    #     "links": [
-    #         {"source": "Microsoft", "target": "Apple", "value": 0.5},
-    #         {"source": "hp", "target": "Apple", "value": 0.5},
-    #         {"source": "logitech", "target": "Apple", "value": 0.5},
-    #     ]
-    # }
-
-
 
     return JsonResponse(data, safe=False)
 
@@ -606,7 +794,7 @@ def __get_bar_data(user, labels):
                     if buckets_index < (len(response['aggregations']['test']['buckets']) - 1):
                         buckets_index = buckets_index + 1
                 else:
-                    data.append("0")
+                    data.append(0)
         else:
             data = [0, 0, 0, 0, 0, 0, 0]
 
@@ -614,7 +802,6 @@ def __get_bar_data(user, labels):
 
 
 def __get_update_bar_data(user, date):
-
     query = {
         "size": 0,
         "query": {
@@ -677,7 +864,7 @@ def get_update_bar_data(request, user1, user2, date):
     return JsonResponse(data=data, safe=False)
 
 
-def get_bar_data(request, user1, user2):
+def get_bar_data(user1, user2):
     __labels = []
     for day in reversed(range(7)):
         __labels.append(str((datetime.now() - timedelta(days=day)).date()))
@@ -696,11 +883,7 @@ def get_bar_data(request, user1, user2):
     return JsonResponse(data=data, safe=False)
 
 
-def user_sentiment_analysis(request, userid):
-
-    t = timer.Timer('user_sentiment')
-    t.start()
-
+def user_sentiment_analysis(userid):
     query = {
       "size": 10000,
       "query": {
@@ -736,13 +919,10 @@ def user_sentiment_analysis(request, userid):
         'data': dataset,
         'title_text': "Sentiment Analysis with {} Tweets for {}".format(total, name)
     }
-    elapsed_time = t.stop()
-    print('[views.user_sentment_analsysis] Time to compleat: {} sec'.format(elapsed_time))
     return JsonResponse(data=data, safe=False)
 
 
-def user_hour_analysis(request, userid):
-
+def user_hour_analysis(userid):
     query = {
       "size": 0,
       "query": {
@@ -771,21 +951,16 @@ def user_hour_analysis(request, userid):
     for i in range(24):
         __data[i] = 0
 
-    # print(__data)
-
     if response:
         total = response['hits']['total']['value']
         for bucket in response['aggregations']['hour_analysis']['buckets']:
             date = datetime.strptime(bucket['key_as_string'], '%Y-%m-%dT%H:%M:%S.%fZ')
             __data[date.hour] = __data[date.hour] + bucket['doc_count']
 
-        # print(__data)
-
     __dataset = []
     for i in range(24):
         __dataset.append(__data[i])
 
-    # print(str(__dataset))
     data = {
         'data': __dataset,
         'title_text': "User Analysis with " + str(total) + " Tweets for " + userid,
@@ -795,7 +970,6 @@ def user_hour_analysis(request, userid):
 
 
 def __get_user_information(userid):
-
     query = {
       "query": {
         "match": {"id": userid}
@@ -820,7 +994,6 @@ def __get_user_information(userid):
 # comprobar que el usarioid existe
 # obtener su información
 def user_dashboard(request, userid):
-
     data = __get_user_information(userid)
     data['profile_image_url_https'] = data['profile_image_url_https'].replace("_normal", "")
     d = datetime.today() - datetime.strptime(data['created_at'], '%Y-%m-%dT%H:%M:%S')
@@ -839,4 +1012,3 @@ def user_dashboard(request, userid):
         'data': data
     }
     return render(request, template, context)
-

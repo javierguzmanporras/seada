@@ -1,0 +1,19 @@
+FROM python:3.7
+
+# Make a directory called "code" which will contain the source code.
+RUN mkdir /code
+
+# Packages that we need
+COPY seada/seadaAnalysis/seadaAnalysis/ /code/
+COPY requirements.txt /code/
+
+# Set the working directory for the container.
+WORKDIR /code
+
+# Install all dependencies required for this project.
+# The trusted-host flag is useful if you are behind a corporate proxy.
+RUN pip3 install --trusted-host pypy.org --trusted-host files.pythonhosted.org -r requirements.txt
+
+EXPOSE 8000
+
+ENTRYPOINT ["python3","manage.py","runserver"]

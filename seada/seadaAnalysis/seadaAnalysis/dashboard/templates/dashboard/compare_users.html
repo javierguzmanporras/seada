@@ -26,7 +26,7 @@
                         </div>
                         <script src="https://code.highcharts.com/highcharts.js"></script>
                         <script src="https://code.highcharts.com/modules/timeline.js"></script>
-                        <script src="{% static 'dashboard/highcharts_timeline_v2.js' %}"></script>
+                        <script src="{% static 'dashboard/js/highcharts_timeline_v2.js' %}"></script>
                     </div>
                 </div>
             </div>
@@ -54,7 +54,7 @@
                         </div>
                         <script src="https://code.highcharts.com/highcharts.js"></script>
                         <script src="https://code.highcharts.com/modules/timeline.js"></script>
-                        <script src="{% static 'dashboard/highcharts_timeline_user2.js' %}"></script>
+                        <script src="{% static 'dashboard/js/highcharts_timeline_user2.js' %}"></script>
                     </div>
                 </div>
             </div>
@@ -82,7 +82,7 @@
                             <canvas id="networkchart" data-url="{% url 'network_data' user1 user2 %}"></canvas>
                             <script src="https://d3js.org/d3.v4.min.js"></script>
                             <script src="https://d3js.org/d3-selection-multi.v1.js"></script>
-                            <script src="{% static 'dashboard/network.js' %}"></script>
+                            <script src="{% static 'dashboard/js/network.js' %}"></script>
                     </div>
                 </div>
             </div>
@@ -112,7 +112,69 @@
                             <button id="addData">Add Data</button>
                             <button id="removeLastData">Remove last Data</button>
                             <button id="removeFirstData">Remove first Data</button>
-                            <script src="{% static 'dashboard/compare_users_bar_chart.js' %}"></script>
+                            <script src="{% static 'dashboard/js/compare_users_bar_chart.js' %}"></script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <!-- barchart -->
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Area Chart -->
+        <div class="col-lg">
+            <div class="card shadow">
+                <!-- card header -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Tweet and Retweets bar chart 2</h6>
+                </div>
+                 <!-- card header -->
+                <div class="card-body">
+                    <div class="chart-area">
+                        <!-- bar chart -->
+                        <img src={{chart_type}} width={{size}}/>
+
+                        <form action="{% url 'compare_users' %}" method="post">
+                            {% csrf_token %}
+                            <input name="u1" type="hidden" value={{user1}}>
+                            <input name="u2" type="hidden" value={{user2}}>
+                            <button type="submit" class="btn btn-primary">Last week</button>
+                        </form><br>
+
+                        <form action="{% url 'compare_users' %}" method="post">
+                            {% csrf_token %}
+                            <input name="u1" type="hidden" value={{user1}}>
+                            <input name="u2" type="hidden" value={{user2}}>
+                            <div class="row">
+                                <div class="col">
+                                    <input type="text" name="day" class="form-control" placeholder="Day">
+                                </div>
+                                <div class="col">
+                                    <small class="text-muted">Format: YYYY-MM-DD Example: 2020-02-22</small>
+                                </div>
+                            </div>
+                            <br>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form><br>
+
+                        <form action="{% url 'compare_users' %}" method="post">
+                            {% csrf_token %}
+                            <input name="u1" type="hidden" value={{user1}}>
+                            <input name="u2" type="hidden" value={{user2}}>
+                            <div class="row">
+                                <div class="col">
+                                    <input type="text" name="day_hour" class="form-control" placeholder="Day and Hour">
+                                </div>
+                                <div class="col">
+                                    <small class="text-muted">Format: YYYY-MM-DDTHH:SS Example: 2020-02-22T22:22</small>
+                                </div>
+                            </div>
+                            <br>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+
+
                     </div>
                 </div>
             </div>

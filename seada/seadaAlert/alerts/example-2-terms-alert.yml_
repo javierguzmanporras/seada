@@ -1,0 +1,44 @@
+# Alert when ...
+
+# (Required)
+# Rule name, must be unique
+name: Example term alert
+
+# (Required)
+# Type of alert.
+type: term
+
+# (Required)
+# elasticsearch index
+index: twitter_tweets
+
+# (Required)
+# List of terms
+list:
+  - añlskdjfñalksdjfd
+  - ñalskdjfñalksdjfñalk
+#  - ciber
+#  - "#VANESA"
+#  - "#teletrabajo"
+
+# (opcional)
+# operator ('and' , 'or')
+operator: or
+
+# (Required)
+# The alert is use when a match is found
+outputs:
+  - email
+  - telegram
+
+# (required, email specific)
+# a terms_list of email addresses to send alerts to
+emails:
+  - seadaAlert@example.com
+
+# (required, telegram specific)
+# config info for telegram
+telegram:
+  - username: seada_alert_bot
+  - token: 1262332778:AAH5EDRl25ZpHS5NoLKytiI7Bieg-YWrdjg
+  - chatid: 366665070

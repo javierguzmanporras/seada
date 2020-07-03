@@ -16,7 +16,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 from seadaAlert.alert import Alert
-from seadaAlert.sender import Sender
+from seadaAlert.sender import SenderTelegramMessages
 
 
 class AlertHandler:
@@ -316,10 +316,9 @@ class AlertHandler:
                 print("[+] Fail at send email ")
 
         if "telegram" in alert_config.outputs:
-            #send_telegram_message(message=alert_info)
-            s = Sender()
-            s.sendMessageToBot(alert_info)
-            print("[+] Command telegram yeah!")
+            s = SenderTelegramMessages(alert_config=alert_config)
+            s.send_message_to_bot(alert_info)
+            print("[+] {} Telegram message sent...".format(datetime.now()))
 
         if "alexa" in alert_config.outputs:
             # TODO: add config for send alerts to alexa
@@ -404,6 +403,10 @@ class AlertHandler:
         for alert in alerts:
             title_alerts.append(alert.name)
         print('[+] {} Alert\'s tittles: {}'.format(datetime.now(), title_alerts))
+
+        if self.debug:
+            for alert in alerts:
+                print('[+] Alert\'s config: {}'.format(alert))
 
         while True:
             for alert in alerts:

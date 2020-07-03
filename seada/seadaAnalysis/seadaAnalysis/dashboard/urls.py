@@ -14,11 +14,16 @@ urlpatterns = [
     path('compareusers/network/<str:user1>/<str:user2>/', views.get_network_data, name='network_data'),
     path('compareusers/barchart/<str:user1>/<str:user2>/<str:date>', views.get_update_bar_data, name='update_bar_data'),
     path('compareusers/barchart/<str:user1>/<str:user2>', views.get_bar_data, name='bar_data'),
+    path('compareusers/compare/week/<str:user1>/<str:user2>/', views.get_compare_week, name='compare_week'),
+    path('compareusers/compare/day/<str:day>/<str:user1>/<str:user2>/', views.get_compare_day, name='compare_day'),
+    path('compareusers/compare/hour/<str:hour>/<str:user1>/<str:user2>/', views.get_compare_hour, name='compare_hour'),
+
 
     path('chart/', views.get_chart_data, name='chart_data'),
     path('timeline/', views.get_time_line_data, name='time_line_data'),
     path('timelinev2/', views.get_time_line_data_v2, name='time_line_data_v2'),
-    path('test/', views.get_time_line_mat, name='test'),
+    #path('test/', views.get_time_line_mat, name='test'),
+    #path('test/', views.get_tw_compare, name='test'),
     path('test2/', views.test, name='test2'),
     path('test2/network/', views.get_network_data, name='network_data')
 ]

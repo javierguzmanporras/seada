@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-from elasticsearchHandler import ElasticSearchUtils
+from .elasticsearchHandler import ElasticSearchUtils
 
 
 def config_elasticsearch(es_host, es_port):

@@ -9,8 +9,8 @@ import os
 import sys
 
 import yaml
-from .Alert import *
-from .Sender import *
+from .alert import *
+from .sender import *
 
 
 # currentdir = os.path.abspath("")
@@ -178,7 +178,7 @@ def main():
     #banner()
 
     config = None
-    config = get_config(file_config='seada-alert-config.yml')
+    config = get_config(file_config='seadaAlert_config.yml')
 
     # print('dirname: {}'.format(os.path.dirname(__file__)))
     # print(os.path.dirname(__file__))
