@@ -36,6 +36,8 @@ python3 seada.py -h
 
 Demo:
 
+![SEADA Demo](demo/demo1.gif)
+
 
 ### Installing Docker
 Install Docker
