@@ -36,8 +36,13 @@ python3 seada.py -h
 
 Demo:
 
-![SEADA Demo](demo/demo1.gif)
+Seada ingest:
 
+![seada-ingest Demo](demo/ingest-demo.gif)
+
+Seada streaming:
+
+![seada-streaming Demo](demo/streaming-demo.gif)
 
 ### Installing Docker
 Install Docker
