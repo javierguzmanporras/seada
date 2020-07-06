@@ -386,8 +386,13 @@ class AlertHandler:
         """
         print('[+] SEADA Alert starting...')
         logging.info('[AlertHandler.start] SEADA Alert starting...')
+        config = {}
 
-        config = self.get_config()
+        if self.config_dir:
+            config = self.get_config()
+        else:  # default values
+            config['alerts_folder'] = '../data/alerts/'
+            config['sleep_interval'] = 900
 
         if self.debug:
             print('[+] config: {}'.format(config))

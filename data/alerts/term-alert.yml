@@ -1,0 +1,37 @@
+# (Required) Rule name, must be unique
+name: BugBounty
+
+# (Required) Type of alert.
+type: term
+
+# (Required) Sleep interval time between search process in seconds
+sleep_interval: 900 #seconds
+
+# (Required) Elasticsearch index
+index: twitter_streaming_tweets
+
+# (Required) List of terms
+list:
+  - BugBounty
+
+# (opcional) operator ('and' , 'or'). or by default
+#operator: or
+
+# (Required) The alert is use when a match is found
+outputs:
+  - email
+  - telegram
+
+# (required, email specific) A terms_list of email addresses to send alerts to
+emails:
+  - seada.alerts@gmail.com
+
+# (required, gmail specific)
+email:
+  - password: "seada4gmail"
+
+# (required, telegram specific) Config info for telegram
+telegram:
+  - username: seada_alert_bot
+  - token: 1262332778:AAH5EDRl25ZpHS5NoLKytiI7Bieg-YWrdjg
+  - chatid: 366665070
