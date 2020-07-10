@@ -71,6 +71,45 @@ set or change vm.max_map_count=262144 in /etc/sysctl.conf
 sysctl -p
 ```
 
+## Usage
+
+```bash
+> python3 seada.py --help
+usage: seada.py [-h] -f {ingest,alert,streaming} [-c CONFIG]
+                [-a ACCOUNT | -al ACCOUNT-LIST [ACCOUNT-LIST ...] | -sl
+                STREAMING_LIST [STREAMING_LIST ...]] [-n TWEETS_NUMBER]
+                [-o {csv,json,database,all}] [-of OUTPUT_FOLDER] [-d] [-wf]
+                [-v]
+
+Sistema de Extracción y Análisis de Datos de fuentes Abiertas
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -f {ingest,alert,streaming}, --feature {ingest,alert,streaming}
+                        Type of feature, ingest information tool or alert tool
+  -c CONFIG, --config CONFIG
+                        Config file in yaml format for alert feature.
+  -a ACCOUNT, --account ACCOUNT
+                        User twitter account
+  -al ACCOUNT-LIST [ACCOUNT-LIST ...], --account_list ACCOUNT-LIST [ACCOUNT-LIST ...]
+                        User terms_list twitter account
+  -sl STREAMING_LIST [STREAMING_LIST ...], --streaming_list STREAMING_LIST [STREAMING_LIST ...]
+                        Download twitter messages in real time.
+  -n TWEETS_NUMBER, --tweets_number TWEETS_NUMBER
+                        Number of tweets that will get from user. Default=100.
+  -o {csv,json,database,all}, --output {csv,json,database,all}
+                        Types of output between json, csv or database.
+                        Default=None.
+  -of OUTPUT_FOLDER, --output_folder OUTPUT_FOLDER
+                        Save the dataset output into specific folder.
+                        Default=seada/data/dataset
+  -d, --debug           Activate debug for see more print outputs
+  -wf, --without_favorites
+                        Get data without favorites
+  -v, --version         show program's version number and exit
+
+Enjoy! :)
+```
 
 ## Deployment
 

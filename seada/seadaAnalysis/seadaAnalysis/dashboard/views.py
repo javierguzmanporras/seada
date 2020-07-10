@@ -483,7 +483,7 @@ def get_compare_day_data(user, day, label_hours):
         else:
             data = np.zeros(24, dtype=int)
 
-    print('data: {}'.format(data))
+    # print('data: {}'.format(data))
     return data
 
 
@@ -581,7 +581,7 @@ def get_compare_hour_data(hour, hour_before, user, label_seconds):
     response = search(es=es, index=index, query=query)
     data = []
 
-    print(response)
+    # print(response)
 
     if response:
         if response['hits']['total']['value'] > 0:
@@ -597,7 +597,7 @@ def get_compare_hour_data(hour, hour_before, user, label_seconds):
         else:
             data = np.zeros(60, dtype=int)
 
-    print('data: {}'.format(data))
+    # print('data: {}'.format(data))
     return data
 
 
@@ -852,8 +852,8 @@ def get_update_bar_data(request, user1, user2, date):
     __user1_data = __get_update_bar_data(user=user1, date=new_date)
     __user2_data = __get_update_bar_data(user=user2, date=new_date)
 
-    print(__user1_data)
-    print(__user2_data)
+    # print(__user1_data)
+    # print(__user2_data)
 
     data = {
         'user1_data': __user1_data, #_user1_data,
@@ -995,7 +995,7 @@ def __get_user_information(userid):
 # obtener su información
 def user_dashboard(request, userid):
 
-    print(userid)
+    # print(userid)
 
     data = __get_user_information(userid)
     data['profile_image_url_https'] = data['profile_image_url_https'].replace("_normal", "")
