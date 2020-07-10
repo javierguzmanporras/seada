@@ -77,6 +77,9 @@ def parse_args():
 
     parser.add_argument('-d', '--debug', action='store_true', help='Activate debug for see more print outputs')
 
+    parser.add_argument('-wf', '--without_favorites', action='store_true',
+                        help='Get data without favorites')
+
     parser.add_argument('-v', '--version', action='version', version=f"%(prog)s {__version__}")
     args = parser.parse_args()
     return args
@@ -225,8 +228,10 @@ def ingest_tool(args, es, api):
         twitter_account.get_friends_output()
         twitter_account.get_followers_information()
         twitter_account.get_followers_output()
-        twitter_account.get_favorites_information()
-        twitter_account.get_favorites_output()
+
+        if not args.without_favorites:
+            twitter_account.get_favorites_information()
+            twitter_account.get_favorites_output()
 
         print('[+] Download and storage {user} information in {time} seconds.'.format(user=args.account,
                                                                                       time=Timer.timers['user_info']))
@@ -240,7 +245,9 @@ def ingest_tool(args, es, api):
                                                                         time=Timer.timers['friends_info']))
 
         print('[+] Download {} follower terms_list in {} seconds'.format(args.account, Timer.timers['followers_info']))
-        print('[+] Download {} favorites in {} seconds'.format(args.account, Timer.timers['favorites_info']))
+
+        if not args.without_favorites:
+            print('[+] Download {} favorites in {} seconds'.format(args.account, Timer.timers['favorites_info']))
 
     if args.account_list:
         twitter_accounts = []
@@ -255,8 +262,10 @@ def ingest_tool(args, es, api):
             twitter_account.get_friends_output()
             twitter_account.get_followers_information()
             twitter_account.get_followers_output()
-            twitter_account.get_favorites_information()
-            twitter_account.get_favorites_output()
+
+            if not args.without_favorites:
+                twitter_account.get_favorites_information()
+                twitter_account.get_favorites_output()
 
             twitter_accounts.append(twitter_account)
 

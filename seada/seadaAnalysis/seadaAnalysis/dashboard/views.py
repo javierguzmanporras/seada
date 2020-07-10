@@ -487,7 +487,7 @@ def get_compare_day_data(user, day, label_hours):
     return data
 
 
-def get_compare_day(day, user1, user2):
+def get_compare_day(request, day, user1, user2):
 
     label_hours = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16',
                    '17', '18', '19', '20', '21', '22', '23']
@@ -601,7 +601,7 @@ def get_compare_hour_data(hour, hour_before, user, label_seconds):
     return data
 
 
-def get_compare_hour(hour, user1, user2):
+def get_compare_hour(request, hour, user1, user2):
 
     label_hours = ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09',
                    '10', '11', '12', '13', '14', '15', '16', '17', '18', '19',
@@ -715,7 +715,7 @@ def __get_network_data(user1, user2, today, before):
     return response['hits']['total']['value']
 
 
-def get_network_data(user1, user2):
+def get_network_data(request, user1, user2):
 
     today = str(datetime.now().date())
     before = str((datetime.now() - timedelta(days=14)).date())
@@ -864,7 +864,7 @@ def get_update_bar_data(request, user1, user2, date):
     return JsonResponse(data=data, safe=False)
 
 
-def get_bar_data(user1, user2):
+def get_bar_data(request, user1, user2):
     __labels = []
     for day in reversed(range(7)):
         __labels.append(str((datetime.now() - timedelta(days=day)).date()))
@@ -883,7 +883,7 @@ def get_bar_data(user1, user2):
     return JsonResponse(data=data, safe=False)
 
 
-def user_sentiment_analysis(userid):
+def user_sentiment_analysis(request, userid):
     query = {
       "size": 10000,
       "query": {
@@ -922,7 +922,7 @@ def user_sentiment_analysis(userid):
     return JsonResponse(data=data, safe=False)
 
 
-def user_hour_analysis(userid):
+def user_hour_analysis(request, userid):
     query = {
       "size": 0,
       "query": {
@@ -994,6 +994,9 @@ def __get_user_information(userid):
 # comprobar que el usarioid existe
 # obtener su información
 def user_dashboard(request, userid):
+
+    print(userid)
+
     data = __get_user_information(userid)
     data['profile_image_url_https'] = data['profile_image_url_https'].replace("_normal", "")
     d = datetime.today() - datetime.strptime(data['created_at'], '%Y-%m-%dT%H:%M:%S')
